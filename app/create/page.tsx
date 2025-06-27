@@ -53,7 +53,6 @@ export default function CreateWorkflow() {
               <SelectItem key="webhook">Webhook</SelectItem>
               <SelectItem key="schedule">Schedule</SelectItem>
               <SelectItem key="manual">Manual</SelectItem>
-              <SelectItem key="event">Event</SelectItem>
             </Select>
             <Input
               label="Trigger URL (if webhook)"

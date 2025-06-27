@@ -1,0 +1,67 @@
+import { getResponse } from '@/app/lib/openai'
+import * as fs from 'node:fs'
+import * as path from 'node:path'
+
+export default async function runWorkflow(input: string, id: number) {
+    // Parse the JSON store
+    const workflowsData = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'app/workflows.json'), 'utf8'))
+
+    console.log(workflowsData)
+
+    let workflows: any[] = []
+    let inputChain = `Input from user: "${input}"`
+
+    if (Array.isArray(workflowsData)) { // Couldn't decide on a JSON schema, so we just do all of them yippee!
+        // If there is a direct array of workflows
+        workflows = workflowsData
+    } else if (workflowsData.workflows && Array.isArray(workflowsData.workflows)) {
+        // if the json is like { workflows: [] }
+        workflows = workflowsData.workflows
+    } else if (workflowsData.workflows && typeof workflowsData.workflows === 'object') {
+        // if ts is like { workflows: { "1": {}, "2": {} } }
+        workflows = Object.values(workflowsData.workflows)
+    } else {
+        throw new Error("What the fuck is ts json.")
+    }
+
+
+    // Get workflow by ID
+    const chosenWorkflow = workflows.find((workflow: any) => {
+        console.log(`Comparing workflow.id: ${workflow.id} (${typeof workflow.id}) with search id: ${id} (${typeof id})`)
+        return workflow.id === id
+    })
+
+    console.log("GOT DA WORKFLOW:", chosenWorkflow)
+
+    if (!chosenWorkflow) {
+        throw new Error("You suck at supplying the correct ID, this one wasn't found")
+    }
+
+    const steps = chosenWorkflow.steps
+    let lastResponse
+
+    // Run each step in order
+    for (const step of steps) {
+        const response = await runStep(step.id, inputChain)
+        inputChain = inputChain.concat(`\n\nResponse from step #${step.id} was "${response}"`)
+        lastResponse = response
+    }
+
+    async function runStep(stepId: number, input?: any) {
+
+        const step = steps.find((step: any) => step.id === stepId)
+
+        console.log("input", input)
+        
+        const response = await getResponse(input, step.instructions, step.model)
+
+        console.log("response", response)
+
+        return response;
+
+    }
+
+    // Once runStep returns after all steps are run, return.
+    return {"success": true, "lastResponse": lastResponse}
+}
+

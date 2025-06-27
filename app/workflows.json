@@ -1,0 +1,23 @@
+{
+    "workflows": [
+        {
+            "id": 1,
+            "name": "Workflow 1",
+            "trigger": "webhook",
+            "steps": [
+                {
+                    "id": 1,
+                    "action": "call_model",
+                    "model": "gpt-4.1-nano",
+                    "instructions": "You are a helpful assistant that can answer questions and help with tasks."
+                },
+                {
+                    "id": 2,
+                    "action": "call_model",
+                    "model": "gpt-4.1-nano",
+                    "instructions": "Always respond like a pirate."
+                }
+            ]
+        }
+    ]
+}
