@@ -1,7 +1,7 @@
 import { getResponse } from '@/app/lib/openai'
 import * as fs from 'node:fs'
 import * as path from 'node:path'
-
+import writeLog from './logger'
 export default async function runWorkflow(input: string, id: number) {
     // Parse the JSON store
     const workflowsData = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'app/workflows.json'), 'utf8'))
@@ -21,6 +21,7 @@ export default async function runWorkflow(input: string, id: number) {
         // if ts is like { workflows: { "1": {}, "2": {} } }
         workflows = Object.values(workflowsData.workflows)
     } else {
+        writeLog("error", "What the fuck is ts json.")
         throw new Error("What the fuck is ts json.")
     }
 
@@ -32,9 +33,11 @@ export default async function runWorkflow(input: string, id: number) {
     })
 
     console.log("GOT DA WORKFLOW:", chosenWorkflow)
+    writeLog("info", `Workflow with id ${id} found`)
 
     if (!chosenWorkflow) {
         throw new Error("You suck at supplying the correct ID, this one wasn't found")
+        writeLog("error", `Workflow with id ${id} not found`)
     }
 
     const steps = chosenWorkflow.steps
@@ -43,6 +46,7 @@ export default async function runWorkflow(input: string, id: number) {
     // Run each step in order
     for (const step of steps) {
         const response = await runStep(step.id, inputChain)
+        writeLog("info", `Response from step #${step.id} was "${response}"`)
         inputChain = inputChain.concat(`\n\nResponse from step #${step.id} was "${response}"`)
         lastResponse = response
     }
@@ -62,6 +66,7 @@ export default async function runWorkflow(input: string, id: number) {
     }
 
     // Once runStep returns after all steps are run, return.
+    writeLog("info", `Workflow with id ${id} completed`)
     return {"success": true, "lastResponse": lastResponse}
 }
 
