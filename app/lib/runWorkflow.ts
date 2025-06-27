@@ -2,6 +2,8 @@ import { getResponse } from '@/app/lib/openai'
 import * as fs from 'node:fs'
 import * as path from 'node:path'
 import writeLog from './logger'
+import sendTelegramMessage from './telegram'
+
 export default async function runWorkflow(input: string, id: number) {
     // Parse the JSON store
     const workflowsData = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'app/workflows.json'), 'utf8'))
@@ -36,8 +38,8 @@ export default async function runWorkflow(input: string, id: number) {
     writeLog("info", `Workflow with id ${id} found`)
 
     if (!chosenWorkflow) {
-        throw new Error("You suck at supplying the correct ID, this one wasn't found")
         writeLog("error", `Workflow with id ${id} not found`)
+        throw new Error("You suck at supplying the correct ID, this one wasn't found")
     }
 
     const steps = chosenWorkflow.steps
@@ -57,11 +59,17 @@ export default async function runWorkflow(input: string, id: number) {
 
         console.log("input", input)
         
-        const response = await getResponse(input, step.instructions, step.model)
+        if (step.action === "call_model") {
+            const response = await getResponse(input, step.instructions, step.model)
+            console.log("response", response)
+            return response;
+        } else if (step.action === "telegram_send") {
+            const response = await sendTelegramMessage(step.message, id)
+            console.log("response", response)
+            return response;
+        }
 
-        console.log("response", response)
 
-        return response;
 
     }
 
