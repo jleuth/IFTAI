@@ -1,7 +1,7 @@
 import * as fs from "node:fs"
 import path from "node:path"
 
-const logPath = (path.join(process.cwd(), 'app/log.json'), 'utf8')
+const logPath = (path.join(process.cwd(), 'app/log.json'))
 
 export default async function writeLog(type: string, message: string) {
     const log = JSON.parse(fs.readFileSync(logPath).toString())
