@@ -15,7 +15,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
   try {
     const { searchParams } = new URL(request.url)
     const input = searchParams.get('input')
-    const id = parseInt(params.id)
+    const id = await parseInt(params.id)
 
     if (!input || !id) {
       return NextResponse.json(
