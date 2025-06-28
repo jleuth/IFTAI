@@ -40,7 +40,7 @@ function constructWorkflow(data: any) {
   fetch('/api/createworkflow', {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json',
+      'Content-Type': 'application/json', "x-auth-token": process.env.AUTH_TOKEN as string
     },
     body: JSON.stringify(workflowData)
   })

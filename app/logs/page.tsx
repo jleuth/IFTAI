@@ -15,7 +15,9 @@ export default function LogsPage() {
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
-        fetch("/api/logs")
+        fetch("/api/logs", {
+            headers: { "x-auth-token": process.env.AUTH_TOKEN as string }
+        })
             .then((res) => res.json())
             .then((data) => {
                 setLogs(data.logs || [])

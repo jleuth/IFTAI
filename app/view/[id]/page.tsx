@@ -36,7 +36,9 @@ export default function ViewWorkflow() {
         setShowLogs(true)
 
         const fetchLogs = async () => {
-            const res = await fetch("/api/logs")
+            const res = await fetch("/api/logs", {
+                headers: { "x-auth-token": process.env.AUTH_TOKEN as string}
+            })
             const data = await res.json();
 
             setShowLogs(data.logs || [])
@@ -48,6 +50,7 @@ export default function ViewWorkflow() {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'x-auth-token': process.env.AUTH_TOKEN as string
             },
         })
     }

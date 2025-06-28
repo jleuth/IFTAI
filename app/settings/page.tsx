@@ -26,7 +26,11 @@ export default function Settings() {
 
   const fetchSettings = async () => {
     try {
-      const response = await fetch('/api/settings');
+      const response = await fetch('/api/settings', {
+        headers: {
+            "x-auth-token": process.env.AUTH_TOKEN as string
+        }
+      });
       if (response.ok) {
         const data = await response.json();
         setFormData(data);
@@ -54,6 +58,7 @@ export default function Settings() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'x-auth-token': process.env.AUTH_TOKEN as string
         },
         body: JSON.stringify(formData),
       });

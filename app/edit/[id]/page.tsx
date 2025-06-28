@@ -82,7 +82,7 @@ export default function EditWorkflow() {
 
         fetch(`/api/editworkflow/${id}`, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: { "Content-Type": "application/json", "x-auth-token": process.env.AUTH_TOKEN as string },
             body: JSON.stringify(workflowData),
         })
             .then((res) => res.json())

@@ -23,7 +23,8 @@ export default function Dashboard() {
         }}>Settings</Button>
         <Button size="lg" color="danger" startContent={<FiX/>} onPress={() => {
           fetch("/api/stop", {
-            method: 'POST'
+            method: 'POST',
+            headers: { "Content-Type": "application/json", "x-auth-token": process.env.AUTH_TOKEN as string }
           })
         }}>EMERGENCY STOP</Button>
       </div>
