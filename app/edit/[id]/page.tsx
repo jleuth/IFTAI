@@ -19,6 +19,7 @@ import { useRouter, useParams } from "next/navigation";
 import StepConfig from "@/components/StepConfig";
 import workflowsData from "../../workflows.json"
 import { FaQuestion } from "react-icons/fa";
+import writeLog from "@/app/lib/logger"
 
 const actionIcons: Record<string, React.ReactNode> = {
     ai: <SiOpenai />,
@@ -132,11 +133,15 @@ export default function EditWorkflow() {
                     router.push("/");
                 } else {
                     console.error("Failed to update workflow:", result.error)
+                    writeLog('info', `User attempted to edit workflow ${workflow!.id} with the API but it errored with the following error: ${result.error}`)
                 }
             })
             .catch((err) => {
                 console.error("error updating workflow:", err)
+                writeLog('info', `User attempted to edit workflow ${workflow!.id} but it errored with the following error: ${err}`)
             });
+
+        writeLog('info', `User edited a workflow with the id of ${workflow!.id} with the changes ${workflowData}`)
     };
 
     if (!workflow) {
@@ -178,6 +183,8 @@ export default function EditWorkflow() {
                     >
                         <SelectItem key="webhook">Webhook</SelectItem>
                         <SelectItem key="cron">Schedule/cron</SelectItem>
+                        <SelectItem key="form">Form</SelectItem>
+                        <SelectItem key="link">Website</SelectItem>
                     </Select>
 
                     {trigger === "cron" && (

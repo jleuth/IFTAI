@@ -12,6 +12,7 @@ import { Form } from "@heroui/form"
 import {  Dropdown,  DropdownTrigger,  DropdownMenu,  DropdownSection,  DropdownItem} from "@heroui/dropdown";
 import React, { useState } from "react";
 import type { Key } from "react";
+import writeLog from "@/app/lib/logger"
 
 import StepConfig from "@/components/StepConfig"
 
@@ -60,6 +61,7 @@ function constructWorkflow(data: any) {
   .then((result) => {
     if (result.success) {
       console.log('Workflow created successfully:', result.workflow);
+      writeLog('info', 'User created a new workflow with the id of ${workflow.id}')
       // Redirect to dashboard or show success message
       window.location.href = '/';
     } else {
@@ -166,6 +168,8 @@ export default function CreateWorkflow() {
             >
               <SelectItem key="webhook">Webhook</SelectItem>
               <SelectItem key="cron">Schedule/cron</SelectItem>
+              <SelectItem key="form">Form</SelectItem>
+              <SelectItem key="link">Website</SelectItem>
             </Select>
 
             {trigger === "cron" && (
