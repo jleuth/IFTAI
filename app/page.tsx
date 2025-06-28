@@ -15,9 +15,6 @@ export default function Dashboard() {
         <Button size="lg" startContent={<FiPlus />} onPress={() => {
         window.location.href = '/create';
         }}>Create a new workflow</Button>
-        <Button size="lg" startContent={<FiEdit />} onPress={() => {
-          window.location.href = '/edit';
-        }}>Edit a workflow</Button>
         <Button size="lg" startContent={<FiSettings />} onPress={() => {
           window.location.href = '/settings';
         }}>Settings</Button>
@@ -34,7 +31,9 @@ export default function Dashboard() {
               <p>Steps: {workflow.steps.length}</p>
             </CardBody>
             <CardFooter>
-              <Button>View</Button>
+            <Button size="lg" startContent={<FiEdit />} onPress={() => {
+          window.location.href = `/edit/${workflow.id}`;
+        }}>Edit workflow</Button>
             </CardFooter>
           </Card>
         ))}
