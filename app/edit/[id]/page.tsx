@@ -36,6 +36,7 @@ export default function EditWorkflow() {
     const [description, setDescription] = useState(workflow?.description || "");
     const [trigger, setTrigger] = useState(workflow?.trigger || "");
     const [model, setModel] = useState(workflow?.model || "");
+    const [schedule, setSchedule] = useState(workflow?.schedule || "")
     const [actions, setActions] = useState<any[]>(workflow?.steps || []);
 
     const actionOptions = [
@@ -130,13 +131,24 @@ export default function EditWorkflow() {
                         <SelectItem key="cron">Schedule/cron</SelectItem>
                     </Select>
 
+                    {trigger === "cron" && (
+                        <Input
+                            isRequired
+                            label="Cron Schedule"
+                            labelPlacement="outside"
+                            placeholder="* * * * *"
+                            value={schedule}
+                            onChange={(e) => setSchedule(e.target.value)}
+                        />
+                    )}
+
                     <Select
                         isRequired
                         label="Model"
                         labelPlacement="outside"
                         placeholder="Select a model"
                         selectedKeys={model}
-                        onChange={(e) => setTrigger(e.target.value)}
+                        onChange={(e) => setModel(e.target.value)}
                     >
                         <SelectSection showDivider title="GPT series">
                             <SelectItem key="gpt-4.1">GPT-4.1</SelectItem>

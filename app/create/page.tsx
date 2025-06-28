@@ -60,6 +60,7 @@ export default function CreateWorkflow() {
   const [actions, setActions] = useState<any[]>([]);
   const [trigger, setTrigger] = useState<any>(null);
   const [model, setModel] = useState<any>(null);
+  const [schedule, setSchedule] = useState("");
   // Action options (icon is only used for rendering, not for state)
   const actionOptions = [
     { key: "ai", label: "Call to AI", icon: <SiOpenai /> },
@@ -122,6 +123,18 @@ export default function CreateWorkflow() {
               <SelectItem key="webhook">Webhook</SelectItem>
               <SelectItem key="cron">Schedule/cron</SelectItem>
             </Select>
+
+            {trigger === "cron" && (
+              <Input
+                isRequired
+                label="Cron schedule"
+                labelPlacement="outside"
+                name="schedule"
+                placeholder="* * * * *"
+                value={schedule}
+                onChange={(e) => setSchedule(e.target.value)}
+              />
+            )}
 
             <Select
               isRequired

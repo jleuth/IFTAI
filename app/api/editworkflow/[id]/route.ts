@@ -25,6 +25,7 @@ export async function POST(
                 name: body.name,
                 description: body.description,
                 trigger: body.trigger,
+                schedule: body.schedule,
                 model: body.model,
                 steps: body.actions,
             };
