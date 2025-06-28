@@ -124,8 +124,10 @@ export default function EditWorkflow() {
                         label="Trigger"
                         labelPlacement="outside"
                         placeholder="Select a trigger"
-                        selectedKeys={trigger}
-                        onChange={(e) => setTrigger(e.target.value)}
+                        selectedKeys={trigger ? new Set([trigger]) : new Set()}
+                        onSelectionChange={(keys) =>
+                            setTrigger(Array.from(keys)[0] as string)
+                        }
                     >
                         <SelectItem key="webhook">Webhook</SelectItem>
                         <SelectItem key="cron">Schedule/cron</SelectItem>
@@ -147,8 +149,10 @@ export default function EditWorkflow() {
                         label="Model"
                         labelPlacement="outside"
                         placeholder="Select a model"
-                        selectedKeys={model}
-                        onChange={(e) => setModel(e.target.value)}
+                        selectedKeys={model ? new Set([model]) : new Set()}
+                        onSelectionChange={(keys) =>
+                            setModel(Array.from(keys)[0] as string)
+                        }
                     >
                         <SelectSection showDivider title="GPT series">
                             <SelectItem key="gpt-4.1">GPT-4.1</SelectItem>
