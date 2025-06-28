@@ -4,9 +4,15 @@ import { Card, CardBody, CardHeader } from "@heroui/card"
 import { Button } from "@heroui/button"
 import { useParams, useRouter } from "next/navigation"
 import workflowsData from "../../workflows.json"
-import React, { useState } from "react"
+import React, { useEffect, useRef, useState } from "react"
 import { Input } from "@heroui/input"
 import { Spacer } from "@heroui/react"
+
+interface LogEntry {
+    type: string;
+    message: string;
+    timestamp: string;
+  }
 
 export default function ViewWorkflow() {
     const router = useRouter();
@@ -14,15 +20,38 @@ export default function ViewWorkflow() {
     const id = Number(params.id);
     const workflow = workflowsData.workflows.find((w) => w.id === id);
     const [manualInput, setManualInput] = useState("")
+    const [logs, setLogs] = useState<LogEntry[]>([])
+    const [showLogs, setShowLogs] = useState(false)
+    const intervalRef = useRef<NodeJS.Timeout | null>(null)
 
-    function manualTrigger(id: number) {
-        fetch(`/api/webhook/${id}?input=${manualInput}`, {
+    useEffect(() => {
+        return () => {
+            if (intervalRef.current) {
+                clearInterval(intervalRef.current)
+            }
+        }
+    }, [])
+
+   async function manualTrigger(id: number) {
+        setShowLogs(true)
+
+        const fetchLogs = async () => {
+            const res = await fetch("/api/logs")
+            const data = await res.json();
+
+            setShowLogs(data.logs || [])
+        }
+
+        await fetchLogs();
+
+        await fetch(`/api/webhook/${id}?input=${manualInput}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
         })
     }
+    
 
     if (!workflow) {
         return <div className="p-8">Workflow not found oopsies</div>
@@ -87,6 +116,25 @@ export default function ViewWorkflow() {
                     <Button onPress={() => manualTrigger(workflow.id)}>Trigger</Button>
                     </div>
                 </div>
+                {showLogs && (
+                    <div className="mt-6 space-y-4">
+                        {logs.length === 0 ? (
+                            <p>No logs yet...</p>
+                        ) : (
+                            logs.map((log: any, idx: number) => (
+                                <Card key={idx}>
+                                    <CardHeader className="flex justify-between font-semibold">
+                                        <span>{log.type}</span>
+                                        <span>{new Date(log.timestamp).toLocaleString()}</span>
+                                    </CardHeader>
+                                    <CardBody>
+                                        <p>{log.message}</p>
+                                    </CardBody>
+                                </Card>
+                            ))
+                        )}
+                    </div>
+                )}
             </div>
         </div>
     )
