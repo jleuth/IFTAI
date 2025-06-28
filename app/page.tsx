@@ -2,7 +2,7 @@
 
 import { Button, ButtonGroup } from "@heroui/button"
 import {Card, CardHeader, CardBody, CardFooter} from "@heroui/card";
-import { FiPlus, FiEdit, FiSettings } from "react-icons/fi"
+import { FiPlus, FiEdit, FiSettings, FiEye } from "react-icons/fi"
 import workflowsData from './workflows.json'
 
 export default function Dashboard() {
@@ -31,9 +31,14 @@ export default function Dashboard() {
               <p>Steps: {workflow.steps.length}</p>
             </CardBody>
             <CardFooter>
-            <Button size="lg" startContent={<FiEdit />} onPress={() => {
-          window.location.href = `/edit/${workflow.id}`;
-        }}>Edit workflow</Button>
+              <div className="flex flex-row gap-3">
+                <Button size="md" startContent={<FiEdit />} onPress={() => {
+                  window.location.href = `/edit/${workflow.id}`;
+                }}>Edit workflow</Button>
+                <Button size='md' startContent={<FiEye />} onPress={() => {
+                  window.location.href = `/view/${workflow.id}`
+                }}>View workflow</Button>
+              </div>
             </CardFooter>
           </Card>
         ))}
