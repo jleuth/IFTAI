@@ -2,7 +2,7 @@
 
 import { Button, ButtonGroup } from "@heroui/button"
 import {Card, CardHeader, CardBody, CardFooter} from "@heroui/card";
-import { FiPlus, FiEdit, FiSettings, FiEye, FiFileText } from "react-icons/fi"
+import { FiPlus, FiEdit, FiSettings, FiEye, FiFileText, FiX } from "react-icons/fi"
 import workflowsData from './workflows.json'
 
 export default function Dashboard() {
@@ -12,7 +12,7 @@ export default function Dashboard() {
       <h1 className="text-3xl font-bold mb-8">What're we automating next?</h1>
 
       <div className="flex flex-row gap-6 mb-8">
-        <Button size="lg" startContent={<FiPlus />} onPress={() => {
+        <Button size="lg" color="primary" startContent={<FiPlus />} onPress={() => {
         window.location.href = '/create';
         }}>Create a new workflow</Button>
         <Button size="lg" startContent={<FiFileText/>} onPress={() => {
@@ -21,6 +21,11 @@ export default function Dashboard() {
         <Button size="lg" startContent={<FiSettings />} onPress={() => {
           window.location.href = '/settings';
         }}>Settings</Button>
+        <Button size="lg" color="danger" startContent={<FiX/>} onPress={() => {
+          fetch("/api/stop", {
+            method: 'POST'
+          })
+        }}>EMERGENCY STOP</Button>
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

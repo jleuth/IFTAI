@@ -4,7 +4,13 @@ import * as path from 'node:path'
 import writeLog from './logger'
 import sendTelegramMessage from './telegram'
 import sendRequest from './sendHttp'
+
 export default async function runWorkflow(input: string, id: number) {
+
+    if (fs.existsSync(path.join(process.cwd(), 'app', '.stop'))) {
+        return { success: false, message: "The emergency stop flag is currently blocking step execution."}
+    }
+
     // Parse the JSON store
     const workflowsData = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'app/workflows.json'), 'utf8'))
 
@@ -54,6 +60,10 @@ export default async function runWorkflow(input: string, id: number) {
     }
 
     async function runStep(stepId: number, input?: any) {
+
+        if (fs.existsSync(path.join(process.cwd(), 'app', '.stop'))) {
+            return { success: false, message: "The emergency stop flag is currently blocking step execution."}
+        }
 
         const step = steps.find((step: any) => step.id === stepId)
 
