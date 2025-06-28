@@ -3,6 +3,7 @@
 import { Button, ButtonGroup } from "@heroui/button"
 import {Card, CardHeader, CardBody, CardFooter} from "@heroui/card";
 import { FiPlus, FiEdit, FiSettings } from "react-icons/fi"
+import workflowsData from './workflows.json'
 
 export default function Dashboard() {
   return (
@@ -23,17 +24,20 @@ export default function Dashboard() {
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <Card>
-          <CardHeader>
-            <h2 className="text-lg font-bold">Workflow 1</h2>
-          </CardHeader>
-          <CardBody>
-            <p>This is the body of the card.</p>
-          </CardBody>
-          <CardFooter>
-            <Button>View</Button>
-          </CardFooter>
-        </Card>
+        {workflowsData.workflows.map((workflow, index) => (
+          <Card key={workflow.id}>
+            <CardHeader>
+              <h2 className="text-lg font-bold">{workflow.name}</h2>
+            </CardHeader>
+            <CardBody>
+              <p>Trigger: {workflow.trigger}</p>
+              <p>Steps: {workflow.steps.length}</p>
+            </CardBody>
+            <CardFooter>
+              <Button>View</Button>
+            </CardFooter>
+          </Card>
+        ))}
       </div>
     </div>
   );
