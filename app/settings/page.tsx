@@ -5,6 +5,7 @@ import {Switch} from "@heroui/switch";
 import { Input } from "@heroui/input";
 import { Button } from "@heroui/button";
 import React, { useState, useEffect } from "react";
+import PageTitle from "@/components/PageTitle";
 
 export default function Settings() {
   const [formData, setFormData] = useState({
@@ -78,7 +79,7 @@ export default function Settings() {
   return (
     <div className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
-            <h1 className="text-3xl font-bold mb-8">Settings</h1>
+            <PageTitle>Settings</PageTitle>
         
             <form onSubmit={handleSubmit}>
               <div className="flex flex-col gap-4 mb-8">

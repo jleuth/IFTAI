@@ -19,6 +19,7 @@ import StepConfig from "@/components/StepConfig";
 import workflowsData from "../../workflows.json"
 import { FaQuestion } from "react-icons/fa";
 import writeLog from "@/app/lib/logger"
+import PageTitle from "@/components/PageTitle";
 
 const actionIcons: Record<string, React.ReactNode> = {
     ai: <SiOpenai />,
@@ -150,7 +151,7 @@ export default function EditWorkflow() {
     return (
         <div className="container mx-auto px-4 py-8">
             <div className="max-w-4xl mx-auto">
-                <h1 className="text-3xl font-bold mb-8">Edit Workflow</h1>
+                <PageTitle>Edit Workflows</PageTitle>
                 <Form className="mb-6" onSubmit={handleSubmit}>
                     <Input
                         isRequired

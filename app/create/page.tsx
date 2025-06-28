@@ -12,8 +12,10 @@ import { Form } from "@heroui/form"
 import {  Dropdown,  DropdownTrigger,  DropdownMenu,  DropdownSection,  DropdownItem} from "@heroui/dropdown";
 import React, { useState } from "react";
 import type { Key } from "react";
+import { Card, CardBody, CardHeader } from "@heroui/card";
 
 import StepConfig from "@/components/StepConfig"
+import PageTitle from "@/components/PageTitle"
 
 // Icon mapping for rendering only
 const actionIcons: Record<string, React.ReactNode> = {
@@ -128,7 +130,7 @@ export default function CreateWorkflow() {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold mb-8">Create New Workflow</h1>
+        <PageTitle>Create New Workflow</PageTitle>
         
         <Form className="mb-6" onSubmit={(e) => {
           e.preventDefault();

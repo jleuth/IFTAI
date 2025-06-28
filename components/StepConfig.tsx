@@ -56,7 +56,7 @@ export default function StepConfig({ step, index, onChange, onRemove}: Props) {
                     <Textarea
                         label="Instructions"
                         labelPlacement="outside"
-                        placeholder="You are an expert of cookies..."
+                        placeholder="You are an expert on cookies..."
                         value={step.instructions || ""}
                         onChange={handleField("instrutions")}
                     />
