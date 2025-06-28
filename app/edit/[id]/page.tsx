@@ -16,7 +16,7 @@ import { RiTelegram2Line } from "react-icons/ri";
 import { SiCurl } from "react-icons/si";
 import React, { useState } from "react";
 import { useRouter, useParams } from "next/navigation";
-
+import StepConfig from "@/components/StepConfig";
 import workflowsData from "../../workflows.json"
 import { FaQuestion } from "react-icons/fa";
 
@@ -40,7 +40,13 @@ export default function EditWorkflow() {
     const [trigger, setTrigger] = useState(workflow?.trigger || "");
     const [model, setModel] = useState(workflow?.model || "");
     const [schedule, setSchedule] = useState(workflow?.schedule || "")
-    const [actions, setActions] = useState<any[]>(workflow?.steps || []);
+    const [actions, setActions] = useState<any[]>(
+        workflow?.steps.map((s: any) => ({
+            key: s.action,
+            label: s.action,
+            ...s,
+        })) || [],
+    );
 
     const actionOptions = [
         { key: "ai", label: "Call to AI", icon: <SiOpenai />},
@@ -58,8 +64,35 @@ export default function EditWorkflow() {
     const handleAddAction = (key: React.Key) => {
         const action = actionOptions.find((a) => a.key === String(key));
 
-        if (action) 
-            setActions((prev) => [...prev, { key: action.key, label: action.label }]);
+        if (action) {
+            let defaults: any = {}
+
+            switch (action.key) {
+                
+                case "ai":
+                    defaults = { instructions: "", model: ""}
+                    break;
+                case "telegram":
+                    defaults = { message: "" }
+                    break
+                case "request":
+                    defaults = { method: "GET", url: "", body: ""}
+                    break
+                case "wait":
+                    defaults = { time: "" }
+                    break
+                case "variable":
+                    defaults = { name: "", value: "" }
+                    break
+                case "return":
+                    defaults = { value: "" }
+                    break
+                }
+                setActions((prev) => [
+                    ...prev,
+                    { key: action.key, label: action.label, ...defaults}
+                ])
+        }
     };
 
     const handleRemoveAction = (idx: number) => {
@@ -77,6 +110,14 @@ export default function EditWorkflow() {
                 id: index + 1,
                 action: a.key,
                 label: a.key,
+                instructions: a.instructions,
+                model: a.model,
+                message: a.message,
+                url: a.url,
+                body: a.body,
+                time: a.time,
+                name: a.name,
+                value: a.value
             })),
         };
 
@@ -179,28 +220,25 @@ export default function EditWorkflow() {
                         {actions.length === 0 ? (
                             <p className='text-default-500'>No actions configured yet</p>
                         ) : (
-                            <div className="flex flex-wrap items-center justify-center gap-2 mb-2"> 
+                            <div className="flex flex-col gap-4">
                                 {actions.map((action, idx) => (
-                                    <React.Fragment key={idx}>
-                                        <span className="inline-flex items-center gap-1 px-3 py-1 bg-default-200 rounded-full">
-                                            {actionIcons[action.key]}
-                                            {action.label}
-                                            <button
-                                                aria-label="Remove action"
-                                                className="ml-1 text-xs text-red-500 hover:underline"
-                                                type="button"
-                                                onClick={() => handleRemoveAction(idx)}
-                                            >
-                                                x
-                                            </button>
-                                        </span>
-                                        {idx < actions.length - 1 && (
-                                            <span className="text-lg">→</span>
-                                        )}
-                                    </React.Fragment>
+                                    <StepConfig
+                                        key={idx}
+                                        index={idx}
+                                        step={action}
+                                        onChange={(i, field, value) =>
+                                            setActions((prev) => 
+                                                prev.map((a, j) => 
+                                                  j === i ? { ...a, [field]: value } : a,  
+                                                ),
+                                            )
+                                        }
+                                        onRemove={handleRemoveAction}
+                                    />
                                 ))}
                             </div>
                         )}
+                    <div className="text-center mt-2">
                      <Dropdown>
                         <DropdownTrigger>
                             <Button className="mt-2" size="sm">
@@ -216,6 +254,7 @@ export default function EditWorkflow() {
                         </DropdownMenu>
                      </Dropdown>
                     </div>
+                </div>
 
                     <Button color="primary" startContent={<FiSave />} type="submit">
                         Save

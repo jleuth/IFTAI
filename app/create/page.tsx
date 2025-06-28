@@ -13,6 +13,8 @@ import {  Dropdown,  DropdownTrigger,  DropdownMenu,  DropdownSection,  Dropdown
 import React, { useState } from "react";
 import type { Key } from "react";
 
+import StepConfig from "@/components/StepConfig"
+
 // Icon mapping for rendering only
 const actionIcons: Record<string, React.ReactNode> = {
   ai: <SiOpenai />,
@@ -29,11 +31,21 @@ function constructWorkflow(data: any) {
     name: data.name,
     description: data.description || '',
     trigger: data.trigger,
+    schedule: data.schedule,
     model: data.model,
     actions: (data.actions || []).map((action: any, index: number) => ({
       id: index + 1,
       action: action.key,
-      label: action.label
+      label: action.label,
+      instructions: action.instructions,
+      model: action.model,
+      message: action.message,
+      method: action.method,
+      url: action.url,
+      body: action.body,
+      time: action.time,
+      name: action.name,
+      value: action.value
     }))
   };
 
@@ -44,8 +56,8 @@ function constructWorkflow(data: any) {
     },
     body: JSON.stringify(workflowData)
   })
-  .then(response => response.json())
-  .then(result => {
+  .then((response) => response.json())
+  .then((result) => {
     if (result.success) {
       console.log('Workflow created successfully:', result.workflow);
       // Redirect to dashboard or show success message
@@ -54,7 +66,7 @@ function constructWorkflow(data: any) {
       console.error('Failed to create workflow:', result.error);
     }
   })
-  .catch(error => {
+  .catch((error) => {
     console.error('Error creating workflow:', error);
   });
 }
@@ -74,10 +86,37 @@ export default function CreateWorkflow() {
     { key: "return", label: "Return a plain string", icon: <FiClock /> }
   ];
 
-  // Add action handler (store only key and label)
+  // Add action handler 
   const handleAddAction = (key: Key) => {
     const action = actionOptions.find((a) => a.key === String(key));
-    if (action) setActions((prev) => [...prev, { key: action.key, label: action.label }]);
+    if (action) {
+      let defaults: any = {};
+
+      switch (action.key) {
+        case "ai":
+          defaults = { instructions: "", model: "" };
+          break;
+        case "telegram":
+          defaults = { message: "" };
+          break;
+        case "request":
+          defaults = { method: "GET", url: "", body: ""}
+          break;
+        case "wait":
+          defaults = { time: ""}
+          break;
+        case "variable":
+          defaults={ name: "", value: "" };
+          break
+        case "return":
+          defaults = { value: "" }
+          break;
+      }
+      setActions((prev) => [
+        ...prev,
+        { key: action.key, label: action.label, ...defaults}
+      ])
+    }
   };
 
   // Remove action handler
@@ -166,24 +205,22 @@ export default function CreateWorkflow() {
               {actions.length === 0 ? (
                 <p className="text-default-500">No actions configured yet</p>
               ) : (
-                <div className="flex flex-wrap items-center justify-center gap-2 mb-2">
-                  {actions.map((action, idx) => (
-                    <React.Fragment key={idx}>
-                      <span className="inline-flex items-center gap-1 px-3 py-1 bg-default-200 rounded-full">
-                        {actionIcons[action.key]}
-                        {action.label}
-                        <button
-                          type="button"
-                          className="ml-2 text-xs text-red-500 hover:underline"
-                          onClick={() => handleRemoveAction(idx)}
-                          aria-label="Remove action"
-                        >
-                          ✕
-                        </button>
-                      </span>
-                      {idx < actions.length - 1 && <span className="text-lg">→</span>}
-                    </React.Fragment>
-                  ))}
+                <div className="flex flex-col gap-4">
+                    {actions.map((action, idx) => (
+                      <StepConfig
+                        key={idx}
+                        index={idx}
+                        step={action}
+                        onChange={(idx: number, field: any, value: any) =>
+                          setActions((prev) =>
+                            prev.map((a, j) =>
+                              j === idx ? { ...a, [field]: value} : a
+                            )
+                          )
+                        }
+                        onRemove={handleRemoveAction}
+                      />
+                    ))}
                 </div>
               )}
               <Dropdown>
