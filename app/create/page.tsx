@@ -1,9 +1,8 @@
 'use client'
 
 import { Button } from "@heroui/button"
-import { Card, CardHeader, CardBody, CardFooter } from "@heroui/card"
 import { Input, Textarea } from "@heroui/input"
-import { Select, SelectItem } from "@heroui/select"
+import { Select, SelectItem, SelectSection } from "@heroui/select"
 import { FiSave, FiX } from "react-icons/fi"
 import { SiOpenai } from "react-icons/si";
 import { RiTelegram2Line } from "react-icons/ri";
@@ -13,24 +12,64 @@ import {  Dropdown,  DropdownTrigger,  DropdownMenu,  DropdownSection,  Dropdown
 import React, { useState } from "react";
 import type { Key } from "react";
 
-function constructWorkflow(name: string, trigger: string, actions: any, description?: string) {
+// Icon mapping for rendering only
+const actionIcons: Record<string, React.ReactNode> = {
+  ai: <SiOpenai />,
+  telegram: <RiTelegram2Line />,
+  request: <SiCurl />,
+};
 
+function constructWorkflow(data: any) {
+  console.log(data)
+  const workflowData = {
+    name: data.name,
+    description: data.description || '',
+    trigger: data.trigger,
+    model: data.model,
+    actions: (data.actions || []).map((action: any, index: number) => ({
+      id: index + 1,
+      action: action.key,
+      label: action.label
+    }))
+  };
+
+  fetch('/api/createworkflow', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(workflowData)
+  })
+  .then(response => response.json())
+  .then(result => {
+    if (result.success) {
+      console.log('Workflow created successfully:', result.workflow);
+      // Redirect to dashboard or show success message
+      window.location.href = '/';
+    } else {
+      console.error('Failed to create workflow:', result.error);
+    }
+  })
+  .catch(error => {
+    console.error('Error creating workflow:', error);
+  });
 }
 
 export default function CreateWorkflow() {
   const [actions, setActions] = useState<any[]>([]);
-
-  // Action options
+  const [trigger, setTrigger] = useState<any>(null);
+  const [model, setModel] = useState<any>(null);
+  // Action options (icon is only used for rendering, not for state)
   const actionOptions = [
     { key: "ai", label: "Call to AI", icon: <SiOpenai /> },
     { key: "telegram", label: "Send a Telegram message", icon: <RiTelegram2Line /> },
     { key: "request", label: "Send an HTTP request", icon: <SiCurl /> },
   ];
 
-  // Add action handler
+  // Add action handler (store only key and label)
   const handleAddAction = (key: Key) => {
     const action = actionOptions.find((a) => a.key === String(key));
-    if (action) setActions((prev) => [...prev, action]);
+    if (action) setActions((prev) => [...prev, { key: action.key, label: action.label }]);
   };
 
   // Remove action handler
@@ -45,7 +84,11 @@ export default function CreateWorkflow() {
         
         <Form className="mb-6" onSubmit={(e) => {
           e.preventDefault();
-          constructWorkflow('1', '1', '1');
+          const data = Object.fromEntries(new FormData(e.currentTarget));
+          data.actions = actions as any;
+          data.trigger = trigger as any;
+          data.model = model as any;
+          constructWorkflow(data);
         }}>
             <Input
               isRequired
@@ -68,12 +111,33 @@ export default function CreateWorkflow() {
             <br/><br/>
 
             <Select
+              isRequired
               label="Trigger"
               labelPlacement="outside"
               placeholder="Select a trigger"
+              onChange={(e) => setTrigger(e.target.value)}
             >
               <SelectItem key="webhook">Webhook</SelectItem>
               <SelectItem key="cron">Schedule/cron</SelectItem>
+            </Select>
+
+            <Select
+              isRequired
+              label="Model"
+              labelPlacement="outside"
+              placeholder="Select a model"
+              onChange={(e) => setModel(e.target.value)}
+            >
+              <SelectSection showDivider title="GPT series">
+                <SelectItem key="gpt-4.1">GPT-4.1</SelectItem>
+                <SelectItem key="gpt-4.1-mini">GPT-4.1 Mini</SelectItem>
+                <SelectItem key="gpt-4.1-nano">GPT-4.1 Nano</SelectItem>
+              </SelectSection>
+              <SelectSection showDivider title="o series">
+                <SelectItem key="o4-mini">o4-mini</SelectItem>
+                <SelectItem key="o3">o3</SelectItem>
+                <SelectItem key="o3-pro">o3-pro</SelectItem>
+              </SelectSection>
             </Select>
 
             <br/><br/>
@@ -86,7 +150,7 @@ export default function CreateWorkflow() {
                   {actions.map((action, idx) => (
                     <React.Fragment key={idx}>
                       <span className="inline-flex items-center gap-1 px-3 py-1 bg-default-200 rounded-full">
-                        {action.icon}
+                        {actionIcons[action.key]}
                         {action.label}
                         <button
                           type="button"
