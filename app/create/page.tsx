@@ -3,10 +3,11 @@
 import { Button } from "@heroui/button"
 import { Input, Textarea } from "@heroui/input"
 import { Select, SelectItem, SelectSection } from "@heroui/select"
-import { FiSave, FiX, FiClock } from "react-icons/fi"
+import { FiSave, FiX, FiClock, FiMessageSquare } from "react-icons/fi"
 import { SiOpenai } from "react-icons/si";
 import { RiTelegram2Line } from "react-icons/ri";
 import { SiCurl } from "react-icons/si";
+import { FaQuestion } from "react-icons/fa";
 import { Form } from "@heroui/form"
 import {  Dropdown,  DropdownTrigger,  DropdownMenu,  DropdownSection,  DropdownItem} from "@heroui/dropdown";
 import React, { useState } from "react";
@@ -18,6 +19,8 @@ const actionIcons: Record<string, React.ReactNode> = {
   telegram: <RiTelegram2Line />,
   request: <SiCurl />,
   wait: <FiClock />,
+  variable: <FaQuestion />,
+  return: <FiClock />
 };
 
 function constructWorkflow(data: any) {
@@ -67,6 +70,8 @@ export default function CreateWorkflow() {
     { key: "telegram", label: "Send a Telegram message", icon: <RiTelegram2Line /> },
     { key: "request", label: "Send an HTTP request", icon: <SiCurl /> },
     { key: "wait", label: "Wait for a specific amount of time", icon: <FiClock /> },
+    { key: "variable", label: "Set a variable", icon: <FaQuestion /> },
+    { key: "return", label: "Return a plain string", icon: <FiClock /> }
   ];
 
   // Add action handler (store only key and label)

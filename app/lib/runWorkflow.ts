@@ -50,6 +50,12 @@ export default async function runWorkflow(input: string, id: number) {
 
     const steps = chosenWorkflow.steps
     let lastResponse
+    const variables: Record<string, any> = {}
+
+    const applyVars = (str: any) => 
+        typeof str === 'string'
+            ? str.replace(/\{\{(.*?)\}\}/g, (_, v) => variables[v.trim()] ?? '')
+            : str
 
     // Run each step in order
     for (const step of steps) {
@@ -57,6 +63,9 @@ export default async function runWorkflow(input: string, id: number) {
         writeLog("info", `Response from step #${step.id} was "${response}"`)
         inputChain = inputChain.concat(`\n\nResponse from step #${step.id} was "${response}"`)
         lastResponse = response
+        if (step.action === 'return_string' || step.action === 'return') {
+            break
+        }
     }
 
     async function runStep(stepId: number, input?: any) {
@@ -68,23 +77,41 @@ export default async function runWorkflow(input: string, id: number) {
         const step = steps.find((step: any) => step.id === stepId)
 
         console.log("input", input)
-        
-        if (step.action === "call_model") {
-            const response = await getResponse(input, step.instructions, step.model)
-            console.log("response", response)
+
+        if(step.action === 'call_model' || step.action === "ai") { //alias
+            const response = await getResponse(
+                applyVars(input),
+                applyVars(step.instructions),
+                step.model
+            )
+            console.log('response:', response)
+            return response
+        } else if (step.action === 'telegram_send' || step.action === 'telegram') {
+            const response = await sendTelegramMessage(applyVars(step.message), id)
+            console.log(response)
+            return response
+        } else if (step.action === 'send_http' || step.action === 'request') {
+            const response = await sendRequest(
+                step.method,
+                applyVars(step.url),
+                applyVars(step.body),
+                step.headers,
+            )
+            console.log(response)
             return response;
-        } else if (step.action === "telegram_send") {
-            const response = await sendTelegramMessage(step.message, id)
-            console.log("response", response)
-            return response;
-        } else if (step.action === "send_http") {
-            const response = await sendRequest(step.method, step.url, step.body, step.headers)
-            console.log("response", response)
-            return response;
+        } else if (step.action === "wait") {
+            const time = Number(step.time || step.duration || 0)
+            await new Promise((r) => setTimeout(r, time))
+            return `waited ${time}ms`
+        } else if (step.action === "set_variable" || step.action === "variable") {
+            if (step.name) {
+                variables[step.name] = applyVars(step.value || '')
+                return `set ${step.name}`
+            }
+            return 'no variable set'
+        } else if (step.action === 'return_string' || step.action === 'return') {
+            return applyVars(step.value || step.message || '')
         }
-
-
-
     }
 
     // Once runStep returns after all steps are run, return.

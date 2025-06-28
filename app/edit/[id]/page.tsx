@@ -18,12 +18,15 @@ import React, { useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 
 import workflowsData from "../../workflows.json"
+import { FaQuestion } from "react-icons/fa";
 
 const actionIcons: Record<string, React.ReactNode> = {
     ai: <SiOpenai />,
     telegram: <RiTelegram2Line />,
     request: <SiCurl />,
     wait: <FiClock />,
+    variable: <FaQuestion />,
+    return: <FiClock />
 };
 
 export default function EditWorkflow() {
@@ -47,6 +50,9 @@ export default function EditWorkflow() {
             icon: <RiTelegram2Line />
         },
         { key: "request", label: "Send an HTTP request", icon: <SiCurl /> },
+        { key: "wait", label: "Wait for a specific amount of time", icon: <FiClock />},
+        { key: "variable", label: "Set a variable", icon: <FaQuestion />},
+        { key: 'return', label: "Return a plain string", icon: <FiClock />}
     ];
 
     const handleAddAction = (key: React.Key) => {
