@@ -2,7 +2,7 @@
 
 import { Button, ButtonGroup } from "@heroui/button"
 import {Card, CardHeader, CardBody, CardFooter} from "@heroui/card";
-import { FiPlus, FiEdit, FiSettings, FiEye } from "react-icons/fi"
+import { FiPlus, FiEdit, FiSettings, FiEye, FiFileText } from "react-icons/fi"
 import workflowsData from './workflows.json'
 
 export default function Dashboard() {
@@ -15,6 +15,9 @@ export default function Dashboard() {
         <Button size="lg" startContent={<FiPlus />} onPress={() => {
         window.location.href = '/create';
         }}>Create a new workflow</Button>
+        <Button size="lg" startContent={<FiFileText/>} onPress={() => {
+          window.location.href = "/logs";
+        }}>View logs</Button>
         <Button size="lg" startContent={<FiSettings />} onPress={() => {
           window.location.href = '/settings';
         }}>Settings</Button>
