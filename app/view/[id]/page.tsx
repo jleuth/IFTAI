@@ -4,13 +4,25 @@ import { Card, CardBody, CardHeader } from "@heroui/card"
 import { Button } from "@heroui/button"
 import { useParams, useRouter } from "next/navigation"
 import workflowsData from "../../workflows.json"
-import React from "react"
+import React, { useState } from "react"
+import { Input } from "@heroui/input"
+import { Spacer } from "@heroui/react"
 
 export default function ViewWorkflow() {
     const router = useRouter();
     const params = useParams();
     const id = Number(params.id);
     const workflow = workflowsData.workflows.find((w) => w.id === id);
+    const [manualInput, setManualInput] = useState("")
+
+    function manualTrigger(id: number) {
+        fetch(`/api/webhook/${id}?input=${manualInput}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        })
+    }
 
     if (!workflow) {
         return <div className="p-8">Workflow not found oopsies</div>
@@ -68,7 +80,13 @@ export default function ViewWorkflow() {
                         </div>
                     </CardBody>
                 </Card>
-                <Button onPress={() => router.push('/')}>Back home</Button>
+                <div className="flex flex-row justify-between items-center gap-8">
+                    <Button onPress={() => router.push('/')}>Back home</Button>
+                    <div className="flex flex-row items-center gap-2">
+                    <Input onValueChange={setManualInput} label="Input" className="max-w-50 h-10"/>
+                    <Button onPress={() => manualTrigger(workflow.id)}>Trigger</Button>
+                    </div>
+                </div>
             </div>
         </div>
     )
