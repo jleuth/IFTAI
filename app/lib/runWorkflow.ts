@@ -3,7 +3,7 @@ import * as fs from 'node:fs'
 import * as path from 'node:path'
 import writeLog from './logger'
 import sendTelegramMessage from './telegram'
-
+import sendRequest from './sendHttp'
 export default async function runWorkflow(input: string, id: number) {
     // Parse the JSON store
     const workflowsData = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'app/workflows.json'), 'utf8'))
@@ -65,6 +65,10 @@ export default async function runWorkflow(input: string, id: number) {
             return response;
         } else if (step.action === "telegram_send") {
             const response = await sendTelegramMessage(step.message, id)
+            console.log("response", response)
+            return response;
+        } else if (step.action === "send_http") {
+            const response = await sendRequest(step.method, step.url, step.body, step.headers)
             console.log("response", response)
             return response;
         }
