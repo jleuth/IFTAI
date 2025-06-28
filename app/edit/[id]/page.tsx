@@ -1,4 +1,3 @@
-"use client";
 
 import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";

@@ -79,10 +79,16 @@ export default async function runWorkflow(input: string, id: number) {
         console.log("input", input)
 
         if(step.action === 'call_model' || step.action === "ai") { //alias
+            // Fallback: use step.model, or workflow.model, or a default
+            let modelToUse = step.model || chosenWorkflow.model || 'gpt-4.1-nano';
+            if (!modelToUse) {
+                writeLog("error", `No model specified for step #${step.id} and no workflow default. Using fallback model 'gpt-4.1-nano'.`);
+                modelToUse = 'gpt-4.1-nano';
+            }
             const response = await getResponse(
                 applyVars(input),
                 applyVars(step.instructions),
-                step.model
+                modelToUse
             )
             console.log('response:', response)
             return response
