@@ -57,7 +57,7 @@ export default function EditWorkflow({
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-auth-token": process.env.AUTH_TOKEN as string,
+        "x-auth-token": process.env.NEXT_PUBLIC_AUTH_TOKEN as string,
       },
       body: JSON.stringify(workflowData),
     })

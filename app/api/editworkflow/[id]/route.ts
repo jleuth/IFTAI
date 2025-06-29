@@ -7,6 +7,16 @@ export async function POST(
   request: NextRequest,
   { params }: { params: { id: string } },
 ) {
+
+  const authToken = request.headers.get("x-auth-token")
+
+  if (!authToken || authToken !== process.env.NEXT_PUBLIC_AUTH_TOKEN) {
+    return NextResponse.json(
+      { error: "unauthorized"},
+      { status: 401 }
+    )
+  }
+
   try {
     const body = await request.json();
     const workflowsPath = path.join(process.cwd(), "app/workflows.json");

@@ -2,12 +2,12 @@
 
 import React from "react";
 
-import PageTitle from "@/components/PageTitle";
+import PageTitle from "@/components/PageTitle"; // For some reason VSC doesn't like this, but it works fine??
 import WorkflowForm from "@/components/WorkflowForm";
 
 function constructWorkflow(data: any) {
   console.log(data);
-  const workflowData = {
+  const workflowData = { // Quite literally every aspect of a workflow. this is a MESS
     name: data.name,
     description: data.description || "",
     trigger: data.trigger,
@@ -28,11 +28,11 @@ function constructWorkflow(data: any) {
     })),
   };
 
-  fetch("/api/createworkflow", {
+  fetch("/api/createworkflow", { // Actually creates the workflow
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "x-auth-token": process.env.AUTH_TOKEN as string,
+      "x-auth-token": process.env.NEXT_PUBLIC_AUTH_TOKEN as string,
     },
     body: JSON.stringify(workflowData),
   })

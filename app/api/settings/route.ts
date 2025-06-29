@@ -5,10 +5,22 @@ import { NextRequest, NextResponse } from "next/server";
 
 const ENV_FILE_PATH = path.join(process.cwd(), ".env.local");
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+
+  // Auth
+  const authToken = request.headers.get("x-auth-token")
+
+  if (!authToken || authToken !== process.env.NEXT_PUBLIC_AUTH_TOKEN) {
+    return NextResponse.json(
+      { error: "unauthorized" },
+      { status: 401 }
+    )
+  }
+
   try {
+    // Grab all the env var data minus auth token
     const envData = {
-      ENABLE_WORKFLOWS: process.env.ENABLE_WORKFLOWS === "true",
+      ENABLE_WORKFLOWS: process.env.ENABLE_WORKFLOWS === "true", // We need to convert these to actual booleans, so we use === true
       ENABLE_WEBHOOKS: process.env.ENABLE_WEBHOOKS === "true",
       ENABLE_TELEGRAM: process.env.ENABLE_TELEGRAM === "true",
       ENABLE_OPENAI: process.env.ENABLE_OPENAI === "true",
@@ -17,6 +29,7 @@ export async function GET() {
       CHAT_ID: process.env.CHAT_ID || "",
     };
 
+    // that's literally it, return just that.
     return NextResponse.json(envData);
   } catch (error) {
     return NextResponse.json(
@@ -30,14 +43,16 @@ export async function POST(request: NextRequest) {
   try {
     const data = await request.json();
 
+    // We make this a let because we wanna update it and read it, const dont do that
     let envContent = "";
 
     if (fs.existsSync(ENV_FILE_PATH)) {
       envContent = fs.readFileSync(ENV_FILE_PATH, "utf8");
     }
 
+    // Check the status
     const envVars = {
-      ENABLE_WORKFLOWS: data.ENABLE_WORKFLOWS ? "true" : "false",
+      ENABLE_WORKFLOWS: data.ENABLE_WORKFLOWS ? "true" : "false", // Again, these get converted to real bools
       ENABLE_WEBHOOKS: data.ENABLE_WEBHOOKS ? "true" : "false",
       ENABLE_TELEGRAM: data.ENABLE_TELEGRAM ? "true" : "false",
       ENABLE_OPENAI: data.ENABLE_OPENAI ? "true" : "false",
@@ -46,6 +61,7 @@ export async function POST(request: NextRequest) {
       CHAT_ID: data.CHAT_ID || "",
     };
 
+    // First, put the old env content into the new env content
     let newEnvContent = envContent;
 
     Object.entries(envVars).forEach(([key, value]) => {
@@ -53,16 +69,16 @@ export async function POST(request: NextRequest) {
       const line = `${key}=${value}`;
 
       if (regex.test(newEnvContent)) {
-        newEnvContent = newEnvContent.replace(regex, line);
+        newEnvContent = newEnvContent.replace(regex, line); // Update without entirely overwriting the file
       } else {
         newEnvContent += `\n${line}`;
       }
     });
 
-    fs.writeFileSync(ENV_FILE_PATH, newEnvContent.trim() + "\n");
+    fs.writeFileSync(ENV_FILE_PATH, newEnvContent.trim() + "\n"); // Actually write to the file
 
     Object.entries(envVars).forEach(([key, value]) => {
-      process.env[key] = value;
+      process.env[key] = value; //Update our vars without needing to restart the server
     });
 
     return NextResponse.json({ success: true });

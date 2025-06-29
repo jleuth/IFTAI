@@ -69,6 +69,7 @@ export default async function runWorkflow(input: string, id: number) {
   let lastResponse;
   const variables: Record<string, any> = {};
 
+  // Apply variables to the input
   const applyVars = (str: any) =>
     typeof str === "string"
       ? str.replace(/\{\{(.*?)\}\}/g, (_, v) => variables[v.trim()] ?? "")
@@ -78,6 +79,7 @@ export default async function runWorkflow(input: string, id: number) {
   for (const step of steps) {
     const response = await runStep(step.id, inputChain);
 
+    // I still don't know if writeLog is working, but i really just don't care
     writeLog("info", `Response from step #${step.id} was "${response}"`);
     inputChain = inputChain.concat(
       `\n\nResponse from step #${step.id} was "${response}"`,
@@ -89,6 +91,9 @@ export default async function runWorkflow(input: string, id: number) {
   }
 
   async function runStep(stepId: number, input?: any) {
+
+
+    // Check if a ".stop" file exists, if it does, that means the emergency stop is on and we should stop the workflow
     if (fs.existsSync(path.join(process.cwd(), "app", ".stop"))) {
       return {
         success: false,
@@ -97,10 +102,12 @@ export default async function runWorkflow(input: string, id: number) {
       };
     }
 
+    // Grab a step from the steps array
     const step = steps.find((step: any) => step.id === stepId);
 
     console.log("input", input);
 
+    // If we call the model, use openai to get the response
     if (step.action === "call_model" || step.action === "ai") {
       //alias
       const response = await getResponse(
@@ -112,13 +119,14 @@ export default async function runWorkflow(input: string, id: number) {
       console.log("response:", response);
 
       return response;
-    } else if (step.action === "telegram_send" || step.action === "telegram") {
+    } else if (step.action === "telegram_send" || step.action === "telegram") { // Send a msg to telegram
+
       const response = await sendTelegramMessage(applyVars(step.message), id);
 
       console.log(response);
 
       return response;
-    } else if (step.action === "send_http" || step.action === "request") {
+    } else if (step.action === "send_http" || step.action === "request") { // Send an HTTP request to anywhere
       const response = await sendRequest(
         step.method,
         applyVars(step.url),
@@ -129,13 +137,13 @@ export default async function runWorkflow(input: string, id: number) {
       console.log(response);
 
       return response;
-    } else if (step.action === "wait") {
+    } else if (step.action === "wait") {// Just literally do nothing for a bit
       const time = Number(step.time || step.duration || 0);
 
       await new Promise((r) => setTimeout(r, time));
 
       return `waited ${time}ms`;
-    } else if (step.action === "set_variable" || step.action === "variable") {
+    } else if (step.action === "set_variable" || step.action === "variable") { // Set a variable
       if (step.name) {
         variables[step.name] = applyVars(step.value || "");
 
@@ -143,7 +151,7 @@ export default async function runWorkflow(input: string, id: number) {
       }
 
       return "no variable set";
-    } else if (step.action === "return_string" || step.action === "return") {
+    } else if (step.action === "return_string" || step.action === "return") { // Return a string. This is useful for API calls that just need a response.
       return applyVars(step.value || step.message || "");
     }
   }

@@ -17,6 +17,15 @@ export async function POST(
   request: NextRequest,
   { params }: { params: { id: string } },
 ) {
+
+  const authToken = request.headers.get("x-auth-token")
+
+  if (!authToken || authToken !== process.env.NEXT_PUBLIC_AUTH_TOKEN) {
+    return NextResponse.json(
+      { error: "Unauthorized" },
+      { status: 401 }
+    )
+  }
   try {
     const { searchParams } = new URL(request.url);
     const input = searchParams.get("input");

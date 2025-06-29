@@ -5,7 +5,7 @@ import { NextResponse } from "next/server";
 
 const stopFile = path.join(process.cwd(), "app", ".stop");
 
-export async function POST() {
+export async function POST() { // No auth here for a reason.
   try {
     fs.writeFileSync(stopFile, "stop");
 

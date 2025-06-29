@@ -5,6 +5,16 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
   try {
+    const authToken = request.headers.get("x-auth-token");
+    
+    // Auth
+    if (!authToken || authToken !== process.env.NEXT_PUBLIC_AUTH_TOKEN) {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+    
     const body = await request.json();
 
     // Read existing workflows

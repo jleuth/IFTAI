@@ -12,19 +12,6 @@ export const Navbar = () => {
           <span className="font-bold text-xl">IFTAI</span>
         </NextLink>
 
-        {/* Navigation Links */}
-        <div className="hidden md:flex items-center gap-6">
-          {siteConfig.navItems.map((item) => (
-            <NextLink
-              key={item.href}
-              className="text-default-600 hover:text-foreground transition-colors"
-              href={item.href}
-            >
-              {item.label}
-            </NextLink>
-          ))}
-        </div>
-
         {/* Right side actions */}
         <div className="flex items-center gap-4">
           <ThemeSwitch />
