@@ -4,7 +4,7 @@ import * as path from "node:path";
 import writeLog from "./logger";
 import sendTelegramMessage from "./telegram";
 import sendRequest from "./sendHttp";
-import { isDemoMode, demoConfig } from "@/config/demo";
+import { isDemoMode, demoConfig, getWorkflowsFilePath } from "@/config/demo";
 
 import { getResponse } from "@/app/lib/openai";
 
@@ -16,10 +16,9 @@ export default async function runWorkflow(input: string, id: number) {
     };
   }
 
-  // Parse the JSON store
-  const workflowsData = JSON.parse(
-    fs.readFileSync(path.join(process.cwd(), "app/workflows.json"), "utf8"),
-  );
+  // Parse the JSON store - use demo workflows if demo mode is enabled
+  const workflowsPath = path.join(process.cwd(), getWorkflowsFilePath());
+  const workflowsData = JSON.parse(fs.readFileSync(workflowsPath, "utf8"));
 
   console.log(workflowsData);
 

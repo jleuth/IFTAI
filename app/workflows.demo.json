@@ -1,0 +1,74 @@
+{
+  "workflows": [
+    {
+      "id": 1,
+      "name": "Daily Weather Summary",
+      "description": "Gets weather data and sends a summary via Telegram",
+      "trigger": "cron",
+      "schedule": "0 8 * * *",
+      "steps": [
+        {
+          "id": 1,
+          "action": "request",
+          "method": "GET",
+          "url": "https://api.openweathermap.org/data/2.5/weather?q=London&appid=demo"
+        },
+        {
+          "id": 2,
+          "action": "ai",
+          "model": "gpt-4.1-mini",
+          "instructions": "Summarize this weather data in a friendly morning message"
+        },
+        {
+          "id": 3,
+          "action": "telegram",
+          "message": "Good morning! {{ai_response}}"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Content Summarizer",
+      "description": "Takes a URL and creates a summary",
+      "trigger": "webhook",
+      "steps": [
+        {
+          "id": 1,
+          "action": "request",
+          "method": "GET",
+          "url": "{{input_url}}"
+        },
+        {
+          "id": 2,
+          "action": "ai",
+          "model": "gpt-4.1",
+          "instructions": "Summarize the following content in 3 bullet points"
+        },
+        {
+          "id": 3,
+          "action": "return",
+          "value": "{{ai_response}}"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Simple Greeting Bot",
+      "description": "Demo workflow that responds to manual input",
+      "trigger": "manual",
+      "steps": [
+        {
+          "id": 1,
+          "action": "ai",
+          "model": "gpt-4.1-mini",
+          "instructions": "Create a friendly greeting based on the user's input. Be enthusiastic and helpful."
+        },
+        {
+          "id": 2,
+          "action": "return",
+          "value": "Bot says: {{ai_response}}"
+        }
+      ]
+    }
+  ]
+}

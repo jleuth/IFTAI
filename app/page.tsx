@@ -11,10 +11,24 @@ import {
   FiX,
 } from "react-icons/fi";
 import { isDemoMode, demoConfig } from "@/config/demo";
+import { useState, useEffect } from "react";
 
-import workflowsData from "./workflows.json";
+// Import both workflow files
+import normalWorkflows from "./workflows.json";
+import demoWorkflows from "./workflows.demo.json";
 
 export default function Dashboard() {
+  const [workflowsData, setWorkflowsData] = useState(normalWorkflows);
+
+  useEffect(() => {
+    // Use demo workflows if demo mode is enabled
+    if (isDemoMode) {
+      setWorkflowsData(demoWorkflows);
+    } else {
+      setWorkflowsData(normalWorkflows);
+    }
+  }, []);
+
   const workflowCount = workflowsData.workflows.length;
   const canCreateMore = !isDemoMode || workflowCount < demoConfig.maxWorkflows;
 

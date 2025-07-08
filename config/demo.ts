@@ -12,3 +12,8 @@ export const demoConfig = {
     request: { demo: true, message: "This is a mocked HTTP response for demo purposes" }
   }
 };
+
+// Utility function to get the correct workflows file path based on demo mode
+export function getWorkflowsFilePath(): string {
+  return isDemoMode ? "app/workflows.demo.json" : "app/workflows.json";
+}

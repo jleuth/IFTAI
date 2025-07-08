@@ -1,9 +1,12 @@
 "use client";
 
 import { redirect } from "next/navigation";
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { isDemoMode } from "@/config/demo";
 
-import workflowsData from "../../workflows.json";
+// Import both workflow files
+import normalWorkflows from "../../workflows.json";
+import demoWorkflows from "../../workflows.demo.json";
 
 import WorkflowForm from "@/components/WorkflowForm";
 import PageTitle from "@/components/PageTitle";
@@ -13,7 +16,18 @@ export default function EditWorkflow({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  const [workflowsData, setWorkflowsData] = useState(normalWorkflows);
   const id = React.use(params);
+
+  useEffect(() => {
+    // Use demo workflows if demo mode is enabled
+    if (isDemoMode) {
+      setWorkflowsData(demoWorkflows);
+    } else {
+      setWorkflowsData(normalWorkflows);
+    }
+  }, []);
+
   const workflow = workflowsData.workflows.find(
     (w) => w.id === parseInt(id.id),
   );

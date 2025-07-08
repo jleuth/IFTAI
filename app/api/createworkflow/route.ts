@@ -2,7 +2,7 @@ import * as fs from "node:fs";
 import path from "node:path";
 
 import { NextRequest, NextResponse } from "next/server";
-import { isDemoMode, demoConfig } from "@/config/demo";
+import { isDemoMode, demoConfig, getWorkflowsFilePath } from "@/config/demo";
 
 export async function POST(request: NextRequest) {
   try {
@@ -26,8 +26,8 @@ export async function POST(request: NextRequest) {
     
     const body = await request.json();
 
-    // Read existing workflows
-    const workflowsPath = path.join(process.cwd(), "app/workflows.json");
+    // Read existing workflows - use demo workflows if demo mode is enabled
+    const workflowsPath = path.join(process.cwd(), getWorkflowsFilePath());
     const workflowsData = JSON.parse(fs.readFileSync(workflowsPath, "utf-8"));
 
     // Demo mode workflow limit

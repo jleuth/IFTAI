@@ -5,8 +5,11 @@ import { Button } from "@heroui/button";
 import { useParams, useRouter } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
 import { Input } from "@heroui/input";
+import { isDemoMode } from "@/config/demo";
 
-import workflowsData from "../../workflows.json";
+// Import both workflow files
+import normalWorkflows from "../../workflows.json";
+import demoWorkflows from "../../workflows.demo.json";
 
 import PageTitle from "@/components/PageTitle";
 
@@ -17,14 +20,25 @@ interface LogEntry {
 }
 
 export default function ViewWorkflow() {
+  const [workflowsData, setWorkflowsData] = useState(normalWorkflows);
   const router = useRouter();
   const params = useParams();
   const id = Number(params.id);
-  const workflow = workflowsData.workflows.find((w) => w.id === id);
   const [manualInput, setManualInput] = useState("");
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [showLogs, setShowLogs] = useState(false);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    // Use demo workflows if demo mode is enabled
+    if (isDemoMode) {
+      setWorkflowsData(demoWorkflows);
+    } else {
+      setWorkflowsData(normalWorkflows);
+    }
+  }, []);
+
+  const workflow = workflowsData.workflows.find((w) => w.id === id);
 
   useEffect(() => {
     return () => {

@@ -2,6 +2,7 @@ import * as fs from "node:fs";
 import path from "node:path";
 
 import { NextRequest, NextResponse } from "next/server";
+import { isDemoMode, demoConfig, getWorkflowsFilePath } from "@/config/demo";
 
 export async function POST(
   request: NextRequest,
@@ -19,7 +20,7 @@ export async function POST(
 
   try {
     const body = await request.json();
-    const workflowsPath = path.join(process.cwd(), "app/workflows.json");
+    const workflowsPath = path.join(process.cwd(), getWorkflowsFilePath());
     const workflowsData = JSON.parse(fs.readFileSync(workflowsPath, "utf-8"));
     const id = parseInt(params.id, 10);
     const index = workflowsData.workflows.findIndex((w: any) => w.id === id);

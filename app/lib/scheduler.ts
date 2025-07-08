@@ -2,11 +2,12 @@ import fs from "node:fs";
 import path from "node:path";
 
 import cron from "node-cron";
+import { getWorkflowsFilePath } from "@/config/demo";
 
 import runWorkflow from "./runWorkflow";
 
 export default function startScheduledWorkflows() {
-  const workflowsPath = path.join(process.cwd(), "app/workflows.json");
+  const workflowsPath = path.join(process.cwd(), getWorkflowsFilePath());
 
   if (!fs.existsSync(workflowsPath)) return;
   const workflowsData = JSON.parse(fs.readFileSync(workflowsPath, "utf-8"));
