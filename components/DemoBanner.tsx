@@ -13,12 +13,18 @@ export default function DemoBanner() {
   if (!showBanner) return null;
   
   return (
-    <div className="bg-yellow-100 border-yellow-500 text-yellow-700 p-4 mb-4">
-      <div className="flex">
-        <div className="ml-3">
-          <p className="text-sm">
-            <strong>Demo Mode:</strong> You're viewing a demonstration of IFTAI. 
-            External services are mocked and some features are restricted.
+    <div className="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30 border border-amber-200 dark:border-amber-800 rounded-xl p-4 mb-6 shadow-sm">
+      <div className="flex items-center justify-center">
+        <div className="text-center">
+          <div className="flex items-center justify-center gap-2 mb-2">
+            <span className="w-2 h-2 bg-amber-500 rounded-full animate-pulse"></span>
+            <strong className="text-amber-800 dark:text-amber-200 font-semibold">
+              Demo Mode Active
+            </strong>
+            <span className="w-2 h-2 bg-amber-500 rounded-full animate-pulse"></span>
+          </div>
+          <p className="text-sm text-amber-700 dark:text-amber-300">
+            You're viewing a demonstration of IFTAI. External services are mocked and some features are restricted.
           </p>
         </div>
       </div>
