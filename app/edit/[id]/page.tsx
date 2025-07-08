@@ -16,7 +16,10 @@ export default function EditWorkflow({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const [workflowsData, setWorkflowsData] = useState(normalWorkflows);
+  const [workflowsData, setWorkflowsData] = useState(
+    isDemoMode ? demoWorkflows : normalWorkflows,
+  );
+  const [isLoading, setIsLoading] = useState(true);
   const id = React.use(params);
 
   useEffect(() => {
@@ -26,7 +29,12 @@ export default function EditWorkflow({
     } else {
       setWorkflowsData(normalWorkflows);
     }
+    setIsLoading(false);
   }, []);
+
+  if (isLoading) {
+    return <div className="p-8">Loading...</div>;
+  }
 
   const workflow = workflowsData.workflows.find(
     (w) => w.id === parseInt(id.id),
@@ -39,10 +47,20 @@ export default function EditWorkflow({
   const { steps, ...workflowRest } = workflow;
   const workflowWithActions = {
     ...workflowRest,
-    actions: (steps || []).map((step: any) => ({
+    steps: (steps || []).map((step: any) => ({
       ...step,
       key: step.action,
       label: step.action,
+      // Include all step properties that might be needed by the form
+      instructions: step.instructions,
+      model: step.model,
+      message: step.message,
+      method: step.method,
+      url: step.url,
+      body: step.body,
+      time: step.time,
+      name: step.name,
+      value: step.value,
     })),
   };
 
