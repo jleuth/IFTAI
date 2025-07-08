@@ -4,6 +4,7 @@ import { Switch } from "@heroui/switch";
 import { Input } from "@heroui/input";
 import { Button } from "@heroui/button";
 import React, { useState, useEffect } from "react";
+import { isDemoMode, demoConfig } from "@/config/demo";
 
 import PageTitle from "@/components/PageTitle";
 
@@ -29,7 +30,7 @@ export default function Settings() {
     try {
       const response = await fetch("/api/settings", {
         headers: {
-          "x-auth-token": process.env.AUTH_TOKEN as string,
+          "x-auth-token": process.env.NEXT_PUBLIC_AUTH_TOKEN as string,
         },
       });
 
@@ -62,7 +63,7 @@ export default function Settings() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-auth-token": process.env.AUTH_TOKEN as string,
+          "x-auth-token": process.env.NEXT_PUBLIC_AUTH_TOKEN as string,
         },
         body: JSON.stringify(formData),
       });
@@ -70,7 +71,8 @@ export default function Settings() {
       if (response.ok) {
         setMessage("Settings saved successfully!");
       } else {
-        setMessage("Failed to save settings");
+        const errorData = await response.json();
+        setMessage(errorData.error || "Failed to save settings");
       }
     } catch (error) {
       setMessage("Error saving settings");
@@ -84,31 +86,45 @@ export default function Settings() {
       <div className="max-w-4xl mx-auto">
         <PageTitle>Settings</PageTitle>
 
+        {isDemoMode && (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+            <h3 className="font-semibold text-blue-800 mb-2">Demo Mode Active</h3>
+            <p className="text-blue-700 text-sm">
+              Settings changes are disabled in demo mode for security. 
+              External API calls are mocked and some features are restricted.
+            </p>
+          </div>
+        )}
+
         <form onSubmit={handleSubmit}>
           <div className="flex flex-col gap-4 mb-8">
             <Switch
               isSelected={formData.ENABLE_WORKFLOWS}
+              isDisabled={isDemoMode && !demoConfig.allowSettingsChange}
               onValueChange={handleSwitchChange("ENABLE_WORKFLOWS")}
             >
               Enable running workflows
             </Switch>
             <Switch
               isSelected={formData.ENABLE_WEBHOOKS}
+              isDisabled={isDemoMode && !demoConfig.allowSettingsChange}
               onValueChange={handleSwitchChange("ENABLE_WEBHOOKS")}
             >
               Enable webhooks
             </Switch>
             <Switch
               isSelected={formData.ENABLE_TELEGRAM}
+              isDisabled={isDemoMode && !demoConfig.allowSettingsChange}
               onValueChange={handleSwitchChange("ENABLE_TELEGRAM")}
             >
-              Enable sending messages with Telegram
+              Enable sending messages with Telegram {isDemoMode && "(Mocked in demo)"}
             </Switch>
             <Switch
               isSelected={formData.ENABLE_OPENAI}
+              isDisabled={isDemoMode && !demoConfig.allowSettingsChange}
               onValueChange={handleSwitchChange("ENABLE_OPENAI")}
             >
-              Enable OpenAI
+              Enable OpenAI {isDemoMode && "(Mocked in demo)"}
             </Switch>
           </div>
 
@@ -116,21 +132,24 @@ export default function Settings() {
             <Input
               label="OpenAI API key"
               labelPlacement="outside"
-              placeholder={formData.OPENAI_API_KEY}
+              placeholder={isDemoMode ? "Hidden in demo mode" : formData.OPENAI_API_KEY}
               type="password"
+              isDisabled={isDemoMode && !demoConfig.allowSettingsChange}
               onChange={handleInputChange("OPENAI_API_KEY")}
             />
             <Input
               label="Telegram Bot key"
               labelPlacement="outside"
-              placeholder={formData.TELEGRAM_BOT_API_KEY}
+              placeholder={isDemoMode ? "Hidden in demo mode" : formData.TELEGRAM_BOT_API_KEY}
               type="password"
+              isDisabled={isDemoMode && !demoConfig.allowSettingsChange}
               onChange={handleInputChange("TELEGRAM_BOT_API_KEY")}
             />
             <Input
               label="Telegram Chat ID"
               labelPlacement="outside"
-              placeholder={formData.CHAT_ID}
+              placeholder={isDemoMode ? "Hidden in demo mode" : formData.CHAT_ID}
+              isDisabled={isDemoMode && !demoConfig.allowSettingsChange}
               onChange={handleInputChange("CHAT_ID")}
             />
           </div>
@@ -140,8 +159,9 @@ export default function Settings() {
             color="primary"
             isLoading={loading}
             type="submit"
+            isDisabled={isDemoMode && !demoConfig.allowSettingsChange}
           >
-            Save Settings
+            {isDemoMode && !demoConfig.allowSettingsChange ? "Disabled in Demo" : "Save Settings"}
           </Button>
 
           {message && (

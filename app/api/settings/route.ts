@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 
 import { NextRequest, NextResponse } from "next/server";
+import { isDemoMode, demoConfig } from "@/config/demo";
 
 const ENV_FILE_PATH = path.join(process.cwd(), ".env.local");
 
@@ -41,6 +42,24 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    const authToken = request.headers.get("x-auth-token");
+    
+    // Auth
+    if (!authToken || authToken !== process.env.NEXT_PUBLIC_AUTH_TOKEN) {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
+    // Demo mode restrictions
+    if (isDemoMode && !demoConfig.allowSettingsChange) {
+      return NextResponse.json(
+        { error: "Settings changes are disabled in demo mode for security" },
+        { status: 403 }
+      );
+    }
+
     const data = await request.json();
 
     // We make this a let because we wanna update it and read it, const dont do that

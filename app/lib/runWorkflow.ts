@@ -4,6 +4,7 @@ import * as path from "node:path";
 import writeLog from "./logger";
 import sendTelegramMessage from "./telegram";
 import sendRequest from "./sendHttp";
+import { isDemoMode, demoConfig } from "@/config/demo";
 
 import { getResponse } from "@/app/lib/openai";
 
@@ -91,8 +92,6 @@ export default async function runWorkflow(input: string, id: number) {
   }
 
   async function runStep(stepId: number, input?: any) {
-
-
     // Check if a ".stop" file exists, if it does, that means the emergency stop is on and we should stop the workflow
     if (fs.existsSync(path.join(process.cwd(), "app", ".stop"))) {
       return {
@@ -109,24 +108,49 @@ export default async function runWorkflow(input: string, id: number) {
 
     // If we call the model, use openai to get the response
     if (step.action === "call_model" || step.action === "ai") {
-      //alias
+      if (isDemoMode) {
+        // Mock AI response in demo mode
+        const mockResponse = `${demoConfig.mockResponses.ai} (Model: ${step.model || 'gpt-4.1'})`;
+        variables["ai_response"] = mockResponse;
+        console.log("Demo AI response:", mockResponse);
+        return mockResponse;
+      }
+
       const response = await getResponse(
         applyVars(input),
         applyVars(step.instructions),
         step.model,
       );
 
+      variables["ai_response"] = response;
+
       console.log("response:", response);
 
       return response;
-    } else if (step.action === "telegram_send" || step.action === "telegram") { // Send a msg to telegram
+    } else if (step.action === "telegram_send" || step.action === "telegram") {
+      if (isDemoMode) {
+        // Mock telegram response in demo mode
+        console.log("Demo Telegram message:", applyVars(step.message));
+        return demoConfig.mockResponses.telegram;
+      }
 
       const response = await sendTelegramMessage(applyVars(step.message), id);
 
       console.log(response);
 
       return response;
-    } else if (step.action === "send_http" || step.action === "request") { // Send an HTTP request to anywhere
+    } else if (step.action === "send_http" || step.action === "request") {
+      if (isDemoMode) {
+        // Mock HTTP request response in demo mode
+        const mockResponse = {
+          ...demoConfig.mockResponses.request,
+          url: applyVars(step.url),
+          method: step.method
+        };
+        console.log("Demo HTTP request:", mockResponse);
+        return mockResponse;
+      }
+
       const response = await sendRequest(
         step.method,
         applyVars(step.url),
@@ -137,13 +161,19 @@ export default async function runWorkflow(input: string, id: number) {
       console.log(response);
 
       return response;
-    } else if (step.action === "wait") {// Just literally do nothing for a bit
+    } else if (step.action === "wait") {
       const time = Number(step.time || step.duration || 0);
+
+      if (isDemoMode && time > 5000) {
+        // In demo mode, limit wait times to 5 seconds max
+        await new Promise((r) => setTimeout(r, 5000));
+        return `waited 5000ms (limited in demo mode, requested ${time}ms)`;
+      }
 
       await new Promise((r) => setTimeout(r, time));
 
       return `waited ${time}ms`;
-    } else if (step.action === "set_variable" || step.action === "variable") { // Set a variable
+    } else if (step.action === "set_variable" || step.action === "variable") {
       if (step.name) {
         variables[step.name] = applyVars(step.value || "");
 
@@ -151,7 +181,7 @@ export default async function runWorkflow(input: string, id: number) {
       }
 
       return "no variable set";
-    } else if (step.action === "return_string" || step.action === "return") { // Return a string. This is useful for API calls that just need a response.
+    } else if (step.action === "return_string" || step.action === "return") {
       return applyVars(step.value || step.message || "");
     }
   }

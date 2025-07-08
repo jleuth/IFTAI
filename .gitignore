@@ -35,5 +35,8 @@ yarn-error.log*
 next-env.d.ts
 
 .claude
-app/log.json
+.instructions.md
+CLAUDE.md
+/.vscode/
 app/workflows.json
+app/log.json

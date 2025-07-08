@@ -2,6 +2,7 @@ import * as fs from "node:fs";
 import path from "node:path";
 
 import { NextRequest, NextResponse } from "next/server";
+import { isDemoMode, demoConfig } from "@/config/demo";
 
 export async function POST(request: NextRequest) {
   try {
@@ -14,12 +15,28 @@ export async function POST(request: NextRequest) {
         { status: 401 }
       );
     }
+
+    // Demo mode restrictions
+    if (isDemoMode && !demoConfig.allowWorkflowCreation) {
+      return NextResponse.json(
+        { error: "Workflow creation disabled in demo mode" },
+        { status: 403 }
+      );
+    }
     
     const body = await request.json();
 
     // Read existing workflows
     const workflowsPath = path.join(process.cwd(), "app/workflows.json");
     const workflowsData = JSON.parse(fs.readFileSync(workflowsPath, "utf-8"));
+
+    // Demo mode workflow limit
+    if (isDemoMode && workflowsData.workflows.length >= demoConfig.maxWorkflows) {
+      return NextResponse.json(
+        { error: `Maximum workflows reached in demo mode (${demoConfig.maxWorkflows})` },
+        { status: 403 }
+      );
+    }
 
     // Generate new workflow ID
     const newId =

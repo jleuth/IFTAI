@@ -24,13 +24,54 @@ git clone https://github.com/jleuth/IFTAI.git
 ```bash
 npm i
 ```
-3. Run the server:
+3. Set up environment variables:
+```bash
+cp .env.example .env.local
+```
+4. Run the server:
 ```bash
 npm run dev
 ```
 
 That's it! Open up http://localhost:3000 in your browser to make your first workflow.
 
+## Demo Mode
+
+IFTAI includes a comprehensive demo mode for hosted demonstrations and safe testing.
+
+### Running in Demo Mode
+
+To enable demo mode, set the following environment variables:
+
+```bash
+DEMO_MODE=true
+NEXT_PUBLIC_AUTH_TOKEN=demo-token-change-in-production
+```
+
+### Demo Mode Features
+
+- **Safe External Calls**: All external API calls (OpenAI, Telegram, HTTP requests) are mocked
+- **Workflow Limits**: Maximum of 10 workflows to prevent spam
+- **Settings Protection**: Environment variables and API keys are protected from changes
+- **Visual Indicators**: Demo banners and badges throughout the UI
+- **Mock Responses**: Realistic fake responses for AI, messaging, and HTTP requests
+
+### Demo Mode Limitations
+
+- Settings changes are disabled for security
+- External API calls return mock data
+- Telegram messages are simulated (not actually sent)
+- AI responses are mocked (no actual OpenAI API calls)
+- Wait times are limited to 5 seconds maximum
+- Workflow creation is limited to prevent abuse
+
+### Sample Demo Workflows
+
+The demo includes three pre-configured workflows:
+
+1. **Daily Weather Summary** - Demonstrates scheduled workflows with API calls and messaging
+2. **Content Summarizer** - Shows webhook triggers and AI processing
+3. **Simple Greeting Bot** - Manual trigger example with AI responses
 
 ## Features
 
@@ -82,7 +123,6 @@ Content-Type: application/json
     "name": "string",
     "description": "string",
     "trigger": "webhook|cron|whatever",
-    "model": "string of a real OpenAI model identifier (e.g. o4-mini)",
     "actions": [
         {
             "id": number,
@@ -104,3 +144,22 @@ Content-Type: application/json
 ### Environment variables
 
 You can update them all in settings, just make sure to make a `.env.local` in the root directory before you do.
+
+## Production Deployment
+
+For production deployment:
+
+1. Copy `.env.example` to `.env.local` 
+2. Set `DEMO_MODE=false` for full functionality
+3. Add your real API keys:
+   - `OPENAI_API_KEY` for AI functionality
+   - `TELEGRAM_BOT_API_KEY` and `CHAT_ID` for messaging
+4. Use a secure `NEXT_PUBLIC_AUTH_TOKEN`
+5. Configure your hosting platform environment variables
+
+## Security
+
+- All API endpoints require authentication via `x-auth-token` header
+- Demo mode provides safe sandboxing for public demonstrations
+- Environment variables are protected in demo mode
+- Emergency stop functionality for immediate workflow termination
