@@ -6,7 +6,7 @@ import { isDemoMode, demoConfig, getWorkflowsFilePath } from "@/config/demo";
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
 
   const authToken = request.headers.get("x-auth-token")
@@ -20,9 +20,10 @@ export async function POST(
 
   try {
     const body = await request.json();
+    const resolvedParams = await params;
     const workflowsPath = path.join(process.cwd(), getWorkflowsFilePath());
     const workflowsData = JSON.parse(fs.readFileSync(workflowsPath, "utf-8"));
-    const id = parseInt(params.id, 10);
+    const id = parseInt(resolvedParams.id, 10);
     const index = workflowsData.workflows.findIndex((w: any) => w.id === id);
 
     if (index === -1) {

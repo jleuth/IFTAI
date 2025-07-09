@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import fs from "fs";
+import path from "path";
 
 import runWorkflow from "@/app/lib/runWorkflow";
 
@@ -14,45 +16,31 @@ export async function OPTIONS() { // Cors Options
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
-  //Auth
-  const authToken = request.headers.get("x-auth-token")
+  const resolvedParams = await params;
+  const authToken = request.headers.get("x-auth-token");
 
   if (!authToken || authToken !== process.env.NEXT_PUBLIC_AUTH_TOKEN) {
     return NextResponse.json(
-      { error: "unauthorized"},
+      { error: "unauthorized" },
       { status: 401 }
-    )
+    );
   }
 
   try {
-    const id = parseInt(params.id);
+    const body = await request.json();
+    const workflowsPath = path.join(process.cwd(), "app/workflows.json");
+    const workflowsData = JSON.parse(fs.readFileSync(workflowsPath, "utf-8"));
+    const id = parseInt(resolvedParams.id, 10);
 
     // Check if the ID is valid
     if (Number.isNaN(id)) {
       return NextResponse.json({ error: "Invalid id in URL" }, { status: 400 });
     }
 
-    // Grab the form items from the query string
-    const { searchParams } = new URL(request.url);
-    const queryData = Object.fromEntries(searchParams.entries());
-
-    // Parse the body, whether it's JSON or not
-    const textBody = await request.text();
-    let bodyData: any = {};
-
-    if (textBody) {
-      try {
-        bodyData = JSON.parse(textBody);
-      } catch {
-        bodyData = textBody;
-      }
-    }
-
     // Smash together the query string data and body data and grab the input from it
-    const combined = { query: queryData, body: bodyData };
-    const input = JSON.stringify(combined, null, 2);
+    const input = JSON.stringify(body, null, 2);
 
     const result = await runWorkflow(input, id);
 

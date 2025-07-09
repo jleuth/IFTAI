@@ -17,15 +17,32 @@ import { useState, useEffect } from "react";
 import normalWorkflows from "./workflows.json";
 import demoWorkflows from "./workflows.demo.json";
 
+// Define a common type for workflows
+type WorkflowData = {
+  workflows: Array<{
+    id: number;
+    name: string;
+    description?: string;
+    trigger: string;
+    schedule?: string;
+    model?: string; // Add this missing property
+    steps: Array<{
+      id: number;
+      action: string;
+      [key: string]: any; // Allow any additional properties
+    }>;
+  }>;
+};
+
 export default function Dashboard() {
-  const [workflowsData, setWorkflowsData] = useState(normalWorkflows);
+  const [workflowsData, setWorkflowsData] = useState<WorkflowData>(normalWorkflows as WorkflowData);
 
   useEffect(() => {
     // Use demo workflows if demo mode is enabled
     if (isDemoMode) {
-      setWorkflowsData(demoWorkflows);
+      setWorkflowsData(demoWorkflows as WorkflowData);
     } else {
-      setWorkflowsData(normalWorkflows);
+      setWorkflowsData(normalWorkflows as WorkflowData);
     }
   }, []);
 

@@ -8,6 +8,23 @@ import { isDemoMode } from "@/config/demo";
 import normalWorkflows from "../../workflows.json";
 import demoWorkflows from "../../workflows.demo.json";
 
+// Define a common type for workflows
+type WorkflowData = {
+  workflows: Array<{
+    id: number;
+    name: string;
+    description?: string;
+    trigger: string;
+    schedule?: string;
+    model?: string; // Add this missing property
+    steps: Array<{
+      id: number;
+      action: string;
+      [key: string]: any; // Allow any additional properties
+    }>;
+  }>;
+};
+
 import WorkflowForm from "@/components/WorkflowForm";
 import PageTitle from "@/components/PageTitle";
 
@@ -16,8 +33,8 @@ export default function EditWorkflow({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const [workflowsData, setWorkflowsData] = useState(
-    isDemoMode ? demoWorkflows : normalWorkflows,
+  const [workflowsData, setWorkflowsData] = useState<WorkflowData>(
+    isDemoMode ? (demoWorkflows as WorkflowData) : (normalWorkflows as WorkflowData),
   );
   const [isLoading, setIsLoading] = useState(true);
   const id = React.use(params);
@@ -25,9 +42,9 @@ export default function EditWorkflow({
   useEffect(() => {
     // Use demo workflows if demo mode is enabled
     if (isDemoMode) {
-      setWorkflowsData(demoWorkflows);
+      setWorkflowsData(demoWorkflows as WorkflowData);
     } else {
-      setWorkflowsData(normalWorkflows);
+      setWorkflowsData(normalWorkflows as WorkflowData);
     }
     setIsLoading(false);
   }, []);

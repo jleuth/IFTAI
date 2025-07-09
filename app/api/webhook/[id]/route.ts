@@ -15,23 +15,27 @@ export async function OPTIONS() {
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
+  const resolvedParams = await params;
 
-  const authToken = request.headers.get("x-auth-token")
+  // Auth
+  const authToken = request.headers.get("x-auth-token");
 
   if (!authToken || authToken !== process.env.NEXT_PUBLIC_AUTH_TOKEN) {
     return NextResponse.json(
       { error: "Unauthorized" },
       { status: 401 }
-    )
+    );
   }
-  try {
-    const { searchParams } = new URL(request.url);
-    const input = searchParams.get("input");
-    const id = await parseInt(params.id);
 
-    if (!input || !id) {
+  try {
+    // Get the ID from the slug
+    const id = parseInt(resolvedParams.id);
+    const { searchParams } = new URL(request.url);
+    const input = searchParams.get("input") || "";
+
+    if (!input || isNaN(id)) {
       return NextResponse.json(
         {
           error:

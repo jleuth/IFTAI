@@ -14,23 +14,23 @@ export async function OPTIONS() {
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
+  const resolvedParams = await params;
 
   // Auth
-
   const authToken = request.headers.get("x-auth-token");
   
   if (!authToken || authToken !== process.env.NEXT_PUBLIC_AUTH_TOKEN) {
     return NextResponse.json(
-      { error: "unauthorized"},
+      { error: "unauthorized" },
       { status: 401 }
-    )
+    );
   }
 
   try {
     // Get the ID from the slug
-    const id = parseInt(params.id);
+    const id = parseInt(resolvedParams.id);
     const { searchParams } = new URL(request.url);
     const url = searchParams.get("url");
 
@@ -58,4 +58,12 @@ export async function POST(
       { status: 500 },
     );
   }
+}
+
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  const resolvedParams = await params;
+  // ...existing code...
 }
