@@ -7,15 +7,25 @@ const client = new OpenAI();
 export async function getResponse(
   input: string,
   instructions: string,
-  model: string,
+  model: string = "gpt-4o-mini",
 ) {
-  const response = await client.responses.create({
+  const response = await client.chat.completions.create({
     model: model,
-    instructions: instructions,
-    input: input,
+    messages: [
+      {
+        role: "system",
+        content: instructions,
+      },
+      {
+        role: "user",
+        content: input,
+      },
+    ],
+    temperature: 0.7,
   });
 
-  writeLog("info", `Response: ${response.output_text}`);
+  const responseText = response.choices[0]?.message?.content || "";
+  writeLog("info", `Response: ${responseText}`);
 
-  return response.output_text;
+  return responseText;
 }

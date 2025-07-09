@@ -35,11 +35,10 @@ export async function POST(
     const { searchParams } = new URL(request.url);
     const input = searchParams.get("input") || "";
 
-    if (!input || isNaN(id)) {
+    if (isNaN(id)) {
       return NextResponse.json(
         {
-          error:
-            "Missing required fields: input query parameter and valid id in URL",
+          error: "Invalid id in URL",
         },
         { status: 400 },
       );

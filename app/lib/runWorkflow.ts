@@ -10,9 +10,10 @@ import { getResponse } from "@/app/lib/openai";
 
 export default async function runWorkflow(input: string, id: number) {
   if (fs.existsSync(path.join(process.cwd(), "app", ".stop"))) {
+    writeLog("info", "Emergency stop active - workflow execution aborted");
     return {
       success: false,
-      message: "The emergency stop flag is currently blocking step execution.",
+      message: "Emergency stop active - workflow execution aborted",
     };
   }
 
@@ -26,7 +27,7 @@ export default async function runWorkflow(input: string, id: number) {
   let inputChain = `Input from user: "${input}"`;
 
   if (Array.isArray(workflowsData)) {
-    // Couldn't decide on a JSON schema, so we just do all of them yippee!
+    // Support multiple JSON schema formats for workflows
     // If there is a direct array of workflows
     workflows = workflowsData;
   } else if (
@@ -42,8 +43,8 @@ export default async function runWorkflow(input: string, id: number) {
     // if ts is like { workflows: { "1": {}, "2": {} } }
     workflows = Object.values(workflowsData.workflows);
   } else {
-    writeLog("error", "What the fuck is ts json.");
-    throw new Error("What the fuck is ts json.");
+    writeLog("error", "Invalid JSON structure for workflows.");
+    throw new Error("Invalid JSON structure for workflows.");
   }
 
   // Get workflow by ID
@@ -61,13 +62,15 @@ export default async function runWorkflow(input: string, id: number) {
   if (!chosenWorkflow) {
     writeLog("error", `Workflow with id ${id} not found`);
     throw new Error(
-      "You suck at supplying the correct ID, this one wasn't found",
+      "Workflow with the specified ID was not found",
     );
   }
 
   const steps = chosenWorkflow.steps;
   let lastResponse;
-  const variables: Record<string, any> = {};
+  const variables: Record<string, any> = {
+    input: input // Set the input variable for use in templates
+  };
 
   // Apply variables to the input
   const applyVars = (str: any) =>
@@ -77,9 +80,14 @@ export default async function runWorkflow(input: string, id: number) {
 
   // Run each step in order
   for (const step of steps) {
+    // Add a small delay in demo mode for better visual feedback
+    if (isDemoMode && steps.indexOf(step) > 0) {
+      await new Promise(resolve => setTimeout(resolve, 1500)); // 1.5 second delay between steps
+    }
+    
     const response = await runStep(step.id, inputChain);
 
-    // I still don't know if writeLog is working, but i really just don't care
+    // Log the response from each step
     writeLog("info", `Response from step #${step.id} was "${response}"`);
     inputChain = inputChain.concat(
       `\n\nResponse from step #${step.id} was "${response}"`,
@@ -93,10 +101,10 @@ export default async function runWorkflow(input: string, id: number) {
   async function runStep(stepId: number, input?: any) {
     // Check if a ".stop" file exists, if it does, that means the emergency stop is on and we should stop the workflow
     if (fs.existsSync(path.join(process.cwd(), "app", ".stop"))) {
+      writeLog("info", "Emergency stop active - step execution aborted");
       return {
         success: false,
-        message:
-          "The emergency stop flag is currently blocking step execution.",
+        message: "Emergency stop active - step execution aborted",
       };
     }
 
@@ -107,14 +115,7 @@ export default async function runWorkflow(input: string, id: number) {
 
     // If we call the model, use openai to get the response
     if (step.action === "call_model" || step.action === "ai") {
-      if (isDemoMode) {
-        // Mock AI response in demo mode
-        const mockResponse = `${demoConfig.mockResponses.ai} (Model: ${step.model || 'gpt-4.1'})`;
-        variables["ai_response"] = mockResponse;
-        console.log("Demo AI response:", mockResponse);
-        return mockResponse;
-      }
-
+      // Always use real OpenAI for better demo experience
       const response = await getResponse(
         applyVars(input),
         applyVars(step.instructions),
@@ -147,7 +148,9 @@ export default async function runWorkflow(input: string, id: number) {
           method: step.method
         };
         console.log("Demo HTTP request:", mockResponse);
-        return mockResponse;
+        
+        // Return a formatted description for logs instead of the raw object
+        return `Fetched data from ${applyVars(step.url)} (demo mode)`;
       }
 
       const response = await sendRequest(

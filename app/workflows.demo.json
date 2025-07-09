@@ -2,71 +2,274 @@
   "workflows": [
     {
       "id": 1,
-      "name": "Daily Weather Summary",
-      "description": "Gets weather data and sends a summary via Telegram",
-      "trigger": "cron",
-      "schedule": "0 8 * * *",
+      "name": "AI-Powered Lead Qualification System",
+      "description": "Analyzes incoming leads, qualifies them with AI, and routes to appropriate sales teams",
+      "trigger": "webhook",
       "steps": [
         {
           "id": 1,
-          "action": "request",
-          "method": "GET",
-          "url": "https://api.openweathermap.org/data/2.5/weather?q=London&appid=demo"
+          "action": "ai",
+          "model": "gpt-4.1",
+          "instructions": "Analyze this lead data and provide a qualification score (1-10) and reasoning. Consider company size, budget indicators, urgency signals, and decision-maker level. Format as JSON with fields: score, reasoning, priority_level, recommended_action."
         },
         {
           "id": 2,
           "action": "ai",
           "model": "gpt-4.1-mini",
-          "instructions": "Summarize this weather data in a friendly morning message"
+          "instructions": "Based on the qualification analysis, create a personalized follow-up message that addresses the prospect's specific pain points and value proposition. Keep it professional but warm."
         },
         {
           "id": 3,
+          "action": "request",
+          "method": "POST",
+          "url": "https://api.crm.company.com/leads/update",
+          "body": "{\"lead_id\": \"{{input}}\", \"qualification_score\": \"{{ai_response}}\", \"status\": \"qualified\"}"
+        },
+        {
+          "id": 4,
           "action": "telegram",
-          "message": "Good morning! {{ai_response}}"
+          "message": "🎯 New Qualified Lead Alert!\n\nLead Analysis: {{ai_response}}\n\nPersonalized Message: {{ai_response}}\n\nCRM Updated ✅"
+        },
+        {
+          "id": 5,
+          "action": "return",
+          "value": "Lead qualified and processed successfully. Score: {{ai_response}}"
         }
       ]
     },
     {
       "id": 2,
-      "name": "Content Summarizer",
-      "description": "Takes a URL and creates a summary",
+      "name": "Smart Content Marketing Pipeline",
+      "description": "Monitors trending topics, generates content ideas, creates drafts, and schedules social posts",
+      "trigger": "cron",
+      "schedule": "0 9 * * MON",
+      "steps": [
+        {
+          "id": 1,
+          "action": "request",
+          "method": "GET",
+          "url": "https://api.trendingtopics.com/tech?limit=5"
+        },
+        {
+          "id": 2,
+          "action": "ai",
+          "model": "gpt-4.1",
+          "instructions": "Analyze these trending topics and create 3 compelling blog post ideas that align with our SaaS automation platform. For each idea, provide: title, outline, target audience, SEO keywords, and estimated engagement potential."
+        },
+        {
+          "id": 3,
+          "action": "ai",
+          "model": "gpt-4.1",
+          "instructions": "Take the best blog post idea from the previous analysis and write a complete 800-word blog post. Include engaging introduction, actionable insights, real examples, and strong CTA. Optimize for SEO."
+        },
+        {
+          "id": 4,
+          "action": "ai",
+          "model": "gpt-4.1-mini",
+          "instructions": "Create 5 social media posts promoting this blog content for LinkedIn, Twitter, and Facebook. Include relevant hashtags, engaging hooks, and platform-specific formatting."
+        },
+        {
+          "id": 5,
+          "action": "request",
+          "method": "POST",
+          "url": "https://api.cms.company.com/posts/draft",
+          "body": "{\"title\": \"AI-Generated Content\", \"content\": \"{{ai_response}}\", \"status\": \"draft\"}"
+        },
+        {
+          "id": 6,
+          "action": "telegram",
+          "message": "📝 Weekly Content Pipeline Complete!\n\n✅ Analyzed trending topics\n✅ Generated blog post ideas\n✅ Created full blog post\n✅ Prepared social media posts\n✅ Saved to CMS as draft\n\nReady for review and publishing!"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Customer Support Intelligence Hub",
+      "description": "Analyzes support tickets, provides AI solutions, escalates complex issues, and tracks satisfaction",
+      "trigger": "webhook",
+      "steps": [
+        {
+          "id": 1,
+          "action": "ai",
+          "model": "gpt-4.1",
+          "instructions": "Analyze this customer support ticket and determine: 1) Issue category (technical, billing, feature request, bug), 2) Urgency level (low, medium, high, critical), 3) Sentiment analysis, 4) Suggested solution or next steps, 5) Whether it requires human escalation."
+        },
+        {
+          "id": 2,
+          "action": "ai",
+          "model": "gpt-4.1",
+          "instructions": "Create a helpful, empathetic response to the customer that addresses their specific issue. If it's a technical problem, provide step-by-step troubleshooting. If it's a feature request, acknowledge it professionally. Match the customer's tone and communication style."
+        },
+        {
+          "id": 3,
+          "action": "request",
+          "method": "POST",
+          "url": "https://api.helpdesk.com/tickets/update",
+          "body": "{\"ticket_id\": \"{{input}}\", \"ai_analysis\": \"{{ai_response}}\", \"suggested_response\": \"{{ai_response}}\", \"status\": \"ai_processed\"}"
+        },
+        {
+          "id": 4,
+          "action": "ai",
+          "model": "gpt-4.1-mini",
+          "instructions": "Based on the ticket analysis, create internal notes for the support team including: customer context, solution approach, escalation recommendations, and follow-up actions needed."
+        },
+        {
+          "id": 5,
+          "action": "telegram",
+          "message": "🎧 Support Ticket Processed!\n\nTicket Analysis: {{ai_response}}\n\nCustomer Response Ready: {{ai_response}}\n\nInternal Notes: {{ai_response}}\n\n⚡ Response time: <30 seconds"
+        },
+        {
+          "id": 6,
+          "action": "return",
+          "value": "Support ticket analyzed and processed with AI assistance. Human review recommended for final approval."
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "E-commerce Inventory Optimizer",
+      "description": "Monitors inventory levels, predicts demand, suggests reorders, and optimizes pricing",
+      "trigger": "cron",
+      "schedule": "0 6 * * *",
+      "steps": [
+        {
+          "id": 1,
+          "action": "request",
+          "method": "GET",
+          "url": "https://api.inventory.com/stock-levels?low_threshold=20"
+        },
+        {
+          "id": 2,
+          "action": "request",
+          "method": "GET",
+          "url": "https://api.analytics.com/sales-trends?period=30days"
+        },
+        {
+          "id": 3,
+          "action": "ai",
+          "model": "gpt-4.1",
+          "instructions": "Analyze the inventory data and sales trends. For each low-stock item, provide: 1) Demand forecast for next 30 days, 2) Recommended reorder quantity, 3) Optimal reorder timing, 4) Pricing optimization suggestions, 5) Risk assessment for stockouts."
+        },
+        {
+          "id": 4,
+          "action": "ai",
+          "model": "gpt-4.1-mini",
+          "instructions": "Create automated purchase orders for the top 5 most critical inventory items. Format as JSON with supplier info, quantities, delivery dates, and budget impact."
+        },
+        {
+          "id": 5,
+          "action": "request",
+          "method": "POST",
+          "url": "https://api.procurement.com/purchase-orders/create",
+          "body": "{{ai_response}}"
+        },
+        {
+          "id": 6,
+          "action": "telegram",
+          "message": "📦 Daily Inventory Optimization Complete!\n\n🔍 Analyzed stock levels\n📈 Forecasted demand trends\n🛒 Created purchase orders\n💰 Optimized pricing\n\nInventory Status: {{ai_response}}\n\nActions Taken: {{ai_response}}"
+        },
+        {
+          "id": 7,
+          "action": "return",
+          "value": "Inventory optimization complete. Purchase orders generated and pricing updated automatically."
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "name": "Social Media Crisis Response System",
+      "description": "Monitors brand mentions, detects sentiment issues, escalates crises, and suggests responses",
       "trigger": "webhook",
       "steps": [
         {
           "id": 1,
           "action": "request",
           "method": "GET",
-          "url": "{{input_url}}"
+          "url": "https://api.socialmedia.com/mentions?brand={{input}}&sentiment=negative"
         },
         {
           "id": 2,
           "action": "ai",
           "model": "gpt-4.1",
-          "instructions": "Summarize the following content in 3 bullet points"
+          "instructions": "Analyze these social media mentions for crisis indicators. Evaluate: 1) Severity of negative sentiment, 2) Potential for viral spread, 3) Credibility of sources, 4) Type of crisis (product, service, PR), 5) Recommended response strategy and urgency level (1-10)."
         },
         {
           "id": 3,
+          "action": "ai",
+          "model": "gpt-4.1",
+          "instructions": "If crisis score is above 6, create an immediate response strategy including: 1) Official statement draft, 2) Social media response templates, 3) Internal communication plan, 4) Stakeholder notification list, 5) Timeline for response execution."
+        },
+        {
+          "id": 4,
+          "action": "ai",
+          "model": "gpt-4.1-mini",
+          "instructions": "Generate personalized responses to the top 3 most influential negative mentions. Each response should be empathetic, solution-focused, and brand-appropriate. Include specific talking points and de-escalation techniques."
+        },
+        {
+          "id": 5,
+          "action": "telegram",
+          "message": "🚨 SOCIAL MEDIA CRISIS ALERT!\n\nCrisis Analysis: {{ai_response}}\n\nResponse Strategy: {{ai_response}}\n\nDraft Responses: {{ai_response}}\n\n⚠️ Immediate PR team notification required!"
+        },
+        {
+          "id": 6,
+          "action": "request",
+          "method": "POST",
+          "url": "https://api.crm.com/crisis-log",
+          "body": "{\"incident_type\": \"social_media_crisis\", \"severity\": \"{{ai_response}}\", \"analysis\": \"{{ai_response}}\", \"timestamp\": \"{{timestamp}}\"}"
+        },
+        {
+          "id": 7,
           "action": "return",
-          "value": "{{ai_response}}"
+          "value": "Crisis response protocol activated. PR team notified and response strategy prepared."
         }
       ]
     },
     {
-      "id": 3,
-      "name": "Simple Greeting Bot",
-      "description": "Demo workflow that responds to manual input",
+      "id": 6,
+      "name": "Personalized Customer Journey Optimizer",
+      "description": "Analyzes customer behavior, predicts next actions, and personalizes marketing touchpoints",
       "trigger": "manual",
       "steps": [
         {
           "id": 1,
-          "action": "ai",
-          "model": "gpt-4.1-mini",
-          "instructions": "Create a friendly greeting based on the user's input. Be enthusiastic and helpful."
+          "action": "request",
+          "method": "GET",
+          "url": "https://api.analytics.com/customer/{{input}}/journey-data"
         },
         {
           "id": 2,
+          "action": "ai",
+          "model": "gpt-4.1",
+          "instructions": "Analyze this customer's journey data and create a comprehensive profile including: 1) Current journey stage, 2) Behavioral patterns and preferences, 3) Pain points and barriers, 4) Likelihood to convert/churn, 5) Optimal next touchpoints and messaging."
+        },
+        {
+          "id": 3,
+          "action": "ai",
+          "model": "gpt-4.1",
+          "instructions": "Design a personalized 7-day engagement sequence for this customer. Include: email subjects and content, product recommendations, content suggestions, optimal send times, and success metrics to track."
+        },
+        {
+          "id": 4,
+          "action": "ai",
+          "model": "gpt-4.1-mini",
+          "instructions": "Create personalized product recommendations based on their behavior, purchase history, and similar customer profiles. Include reasoning, expected conversion probability, and upsell opportunities."
+        },
+        {
+          "id": 5,
+          "action": "request",
+          "method": "POST",
+          "url": "https://api.marketing.com/campaigns/personalized",
+          "body": "{\"customer_id\": \"{{input}}\", \"sequence\": \"{{ai_response}}\", \"recommendations\": \"{{ai_response}}\"}"
+        },
+        {
+          "id": 6,
+          "action": "telegram",
+          "message": "🎯 Customer Journey Optimized!\n\nCustomer Profile: {{ai_response}}\n\nPersonalized Sequence: {{ai_response}}\n\nProduct Recommendations: {{ai_response}}\n\n✅ Marketing automation activated"
+        },
+        {
+          "id": 7,
           "action": "return",
-          "value": "Bot says: {{ai_response}}"
+          "value": "Personalized customer journey optimization complete. Marketing sequences activated and recommendations deployed."
         }
       ]
     }

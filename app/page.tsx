@@ -12,6 +12,7 @@ import {
 } from "react-icons/fi";
 import { isDemoMode, demoConfig } from "@/config/demo";
 import { useState, useEffect } from "react";
+import { toast } from "sonner";
 
 // Import both workflow files
 import normalWorkflows from "./workflows.json";
@@ -36,6 +37,7 @@ type WorkflowData = {
 
 export default function Dashboard() {
   const [workflowsData, setWorkflowsData] = useState<WorkflowData>(normalWorkflows as WorkflowData);
+  const [isStoppingWorkflows, setIsStoppingWorkflows] = useState(false);
 
   useEffect(() => {
     // Use demo workflows if demo mode is enabled
@@ -131,14 +133,24 @@ export default function Dashboard() {
             variant="bordered"
             startContent={<FiX />}
             className="shadow-sm hover:shadow-md transition-shadow font-semibold"
-            onPress={() => {
-              fetch("/api/stop", {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                  "x-auth-token": process.env.NEXT_PUBLIC_AUTH_TOKEN as string,
-                },
-              });
+            isLoading={isStoppingWorkflows}
+            disabled={isStoppingWorkflows}
+            onPress={async () => {
+              setIsStoppingWorkflows(true);
+              try {
+                await fetch("/api/stop", {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                    "x-auth-token": process.env.NEXT_PUBLIC_AUTH_TOKEN as string,
+                  },
+                });
+                toast.success("Emergency stop activated - all workflows halted");
+              } catch (error) {
+                toast.error("Failed to activate emergency stop");
+              } finally {
+                setIsStoppingWorkflows(false);
+              }
             }}
           >
             Emergency Stop

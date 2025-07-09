@@ -18,13 +18,13 @@ export default function LogsPage() {
 
   useEffect(() => {
     fetch("/api/logs", {
-      headers: { "x-auth-token": process.env.AUTH_TOKEN as string },
+      headers: { "x-auth-token": process.env.NEXT_PUBLIC_AUTH_TOKEN as string },
     })
       .then((res) => res.json())
       .then((data) => {
         setLogs(data.logs || []);
       })
-      .catch((err) => console.error("Failed to fatch logs:", err))
+      .catch((err) => console.error("Failed to fetch logs:", err))
       .finally(() => setLoading(false));
   }, []);
 

@@ -48,7 +48,7 @@ const actionOptions = [
   { key: "ai", label: "Call to AI", icon: <SiOpenai /> },
   {
     key: "telegram",
-    label: "Send a mesage on Telegram",
+    label: "Send a message on Telegram",
     icon: <RiTelegram2Line />,
   },
   { key: "request", label: "Make an HTTP request", icon: <SiCurl /> },
@@ -175,7 +175,7 @@ export default function WorkflowForm({
 
       <div className="p-4 border border-dashed border-default-300 rounded-lg text-center mx-auto max-w-750">
         {actions.length === 0 ? (
-          <p className="text-default-500">No actions configures</p>
+          <p className="text-default-500">No actions configured</p>
         ) : (
           <div className="flex flex-col gap-4">
             {actions.map((action, idx) => (
